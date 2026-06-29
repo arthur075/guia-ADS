@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Programação — ADS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0d0f14;
+  color: #e2e4ea;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── tokens ── */
+:root {
+  --bg:        #0d0f14;
+  --bg1:       #13161e;
+  --bg2:       #1a1e2a;
+  --bg3:       #222638;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.14);
+  --text:      #e2e4ea;
+  --text2:     #8b90a4;
+  --text3:     #555a70;
+  --accent:    #5b7fff;
+  --accent2:   #3d5fe0;
+  --accentbg:  rgba(91,127,255,0.12);
+  --accentbrd: rgba(91,127,255,0.3);
+  --green:     #3ecf8e;
+  --greenbg:   rgba(62,207,142,0.1);
+  --amber:     #f5a623;
+  --amberbg:   rgba(245,166,35,0.1);
+  --red:       #f56060;
+  --redbg:     rgba(245,96,96,0.1);
+  --purple:    #a78bfa;
+  --purplebg:  rgba(167,139,250,0.1);
+  --teal:      #22d3ee;
+  --tealbg:    rgba(34,211,238,0.1);
+  --radius:    10px;
+  --mono:      'JetBrains Mono', monospace;
+}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+/* ── layout ── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ── sidebar ── */
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  background: var(--bg1);
+  border-right: 1px solid var(--border);
+  position: fixed; top: 0; left: 0;
+  height: 100vh; overflow-y: auto;
+  display: flex; flex-direction: column;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .logo-badge {
+  display: inline-block;
+  background: var(--accentbg);
+  border: 1px solid var(--accentbrd);
+  color: var(--accent);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 3px 8px; border-radius: 4px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.sidebar-logo h1 { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--text); }
+.sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+.sidebar-nav { padding: 0.75rem 0; flex: 1; }
+.nav-section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3);
+  padding: 0.75rem 1.25rem 0.35rem;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 1.25rem;
+  font-size: 13px; color: var(--text2);
+  text-decoration: none; cursor: pointer;
+  transition: all 0.15s; border-left: 2px solid transparent;
+}
+.nav-link:hover { color: var(--text); background: var(--bg2); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: var(--accentbg); }
+.nav-icon { width: 16px; text-align: center; font-size: 14px; }
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--text3);
+}
+.sidebar-footer a { color: var(--accent); text-decoration: none; }
+
+/* ── main ── */
+.main { margin-left: 240px; flex: 1; min-width: 0; }
+.section {
+  display: none;
+  width: min(1180px, calc(100% - 4rem));
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+}
+.section.active { display: block; }
+
+/* ── section header ── */
+.section-header { margin-bottom: 2rem; }
+.section-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-header h2 { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.section-header p { font-size: 14px; color: var(--text2); margin-top: 6px; line-height: 1.7; max-width: 600px; }
+
+/* ── home hero ── */
+.hero {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -60px; right: -40px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(91,127,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accentbg); border: 1px solid var(--accentbrd);
+  color: var(--accent); font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 6px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 1.25rem;
+}
+.hero h1 { font-size: 30px; font-weight: 600; line-height: 1.25; margin-bottom: 1rem; }
+.hero h1 span { color: var(--accent); }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.7; max-width: 560px; margin-bottom: 1.5rem; }
+.hero-stats {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-num { font-size: 22px; font-weight: 600; color: var(--text); }
+.stat-label { font-size: 12px; color: var(--text3); }
+
+.cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.mini-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  cursor: pointer; transition: all 0.15s;
+  text-decoration: none; display: block;
+}
+.mini-card:hover { border-color: var(--border2); background: var(--bg2); transform: translateY(-1px); }
+.mini-card-icon { font-size: 22px; margin-bottom: 8px; }
+.mini-card-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.mini-card-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ── roadmap ── */
+.roadmap { display: flex; flex-direction: column; gap: 0; }
+.phase-row {
+  display: grid; grid-template-columns: 160px 1fr;
+  border-left: 2px solid var(--border2);
+  margin-left: 20px;
+  position: relative;
+}
+.phase-row::before {
+  content: '';
+  position: absolute; left: -7px; top: 1.5rem;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+.phase-label {
+  padding: 1.5rem 1rem 1.5rem 1.5rem;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.phase-mod {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3);
+}
+.phase-sem { font-size: 13px; font-weight: 600; color: var(--text); }
+.phase-module-name { font-size: 11px; color: var(--accent); font-weight: 500; margin-top: 2px; }
+.phase-body {
+  padding: 1.5rem 0 1.5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.phase-row:last-child .phase-body { border-bottom: none; }
+.phase-ch {
+  font-size: 11px; color: var(--text3); margin-bottom: 10px;
+}
+.phase-disciplines { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.discipline-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 12px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.discipline-item .disc-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.discipline-item .disc-info { flex: 1; }
+.discipline-item .disc-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.discipline-item .disc-note { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.4; }
+.disc-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.disc-badge.core { background: var(--accentbg); color: var(--accent); border: 1px solid var(--accentbrd); }
+.disc-badge.prog { background: var(--purplebg); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+.disc-badge.db { background: var(--greenbg); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
+.disc-badge.web { background: var(--tealbg); color: var(--teal); border: 1px solid rgba(34,211,238,0.3); }
+.disc-badge.infra { background: var(--amberbg); color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+.disc-badge.extra { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
+
+/* ── apostilas ── */
+.apostila-accordion { display: flex; flex-direction: column; gap: 10px; }
+.apos-card { background: var(--bg1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.apos-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1rem 1.25rem; cursor: pointer; transition: background 0.15s;
+}
+.apos-header:hover { background: var(--bg2); }
+.apos-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.apos-meta { flex: 1; }
+.apos-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.apos-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.apos-arrow { color: var(--text3); font-size: 18px; transition: transform 0.25s; }
+.apos-arrow.open { transform: rotate(180deg); }
+.apos-body {
+  display: none; border-top: 1px solid var(--border);
+  padding: 1.5rem;
+}
+.apos-body.open { display: block; }
+.concept { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.concept:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.concept-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 4px;
+}
+.concept-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.concept-text { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 10px; }
+pre.code {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px; line-height: 1.75;
+  color: #c9d1d9;
+  overflow-x: auto;
+  white-space: pre;
+}
+.kw { color: #79b8ff; }
+.fn { color: #b392f0; }
+.str { color: #9ecbff; }
+.cm { color: #555a70; }
+.num { color: #f8c555; }
+.tip {
+  background: var(--accentbg); border: 1px solid var(--accentbrd);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: var(--accent); line-height: 1.6;
+  margin-top: 10px;
+}
+.study-kit {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.resource-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+.resource-panel.wide { grid-column: 1 / -1; }
+.resource-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.resource-list, .exercise-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.resource-link {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.resource-link:hover { color: var(--accent); }
+.resource-desc, .exercise-text {
+  display: block;
+  color: var(--text3);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.exercise-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.exercise-level {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+.exercise-level.easy { background: var(--greenbg); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+.exercise-level.medium { background: var(--amberbg); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+.exercise-level.hard { background: var(--redbg); color: var(--red); border: 1px solid rgba(245,96,96,0.25); }
+.project-callout {
+  background: var(--accentbg);
+  border: 1px solid var(--accentbrd);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.project-callout strong {
+  display: block;
+  color: var(--accent);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+/* ── linguagens ── */
+.lang-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.lang-btn {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem;
+  cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.lang-btn:hover { border-color: var(--border2); background: var(--bg2); }
+.lang-btn.active { border-color: var(--accent); background: var(--accentbg); }
+.lang-emoji { font-size: 26px; margin-bottom: 6px; }
+.lang-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.lang-when { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.lang-panel {
+  display: none;
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem;
+}
+.lang-panel.active { display: block; }
+.lang-panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+.lang-panel-emoji { font-size: 32px; }
+.lang-panel-name { font-size: 20px; font-weight: 600; }
+.lang-panel-tag { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.lang-section { margin-bottom: 1.25rem; }
+.lang-section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
+}
+.pillar-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.pillar-item {
+  font-size: 13px; color: var(--text2);
+  padding: 6px 12px; background: var(--bg2);
+  border-radius: 6px; border-left: 2px solid var(--accent);
+  padding-left: 12px;
+}
+.lang-why {
+  font-size: 13px; color: var(--text2); line-height: 1.7;
+  background: var(--bg2); border-radius: 8px; padding: 12px 14px;
+  border-left: 3px solid var(--green);
+}
+
+/* ── tópicos / subáreas ── */
+.topics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.topic-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.topic-card:hover { border-color: var(--border2); background: var(--bg2); }
+.topic-card.active { border-color: var(--accent); background: var(--accentbg); }
+.topic-emoji { font-size: 24px; margin-bottom: 8px; }
+.topic-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.topic-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.topic-detail {
+  display: none; margin-top: 1.25rem;
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem;
+}
+.topic-detail.active { display: block; }
+.topic-detail h3 { font-size: 16px; font-weight: 600; margin-bottom: 1rem; }
+.sub-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.sub-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.sub-num {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  font-family: var(--mono); min-width: 22px; padding-top: 2px;
+}
+.sub-text strong { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+.sub-text span { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ── checklist ── */
+.checklist-group { margin-bottom: 2rem; }
+.checklist-group-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.group-prog { font-size: 11px; color: var(--text3); font-weight: 400; }
+.check-items { display: flex; flex-direction: column; gap: 6px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.check-item:hover { border-color: var(--border2); }
+.check-item.done { background: var(--greenbg); border-color: rgba(62,207,142,0.25); }
+.check-box {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px; font-size: 11px;
+  transition: all 0.15s;
+}
+.check-item.done .check-box { background: var(--green); border-color: var(--green); color: #0d0f14; }
+.check-label { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.check-item.done .check-label { color: var(--text3); text-decoration: line-through; }
+
+/* projetos */
+.project-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 1.25rem;
+}
+.control-group {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.control-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.project-filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.project-filter {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.project-filter:hover { border-color: var(--border2); color: var(--text); }
+.project-filter.active {
+  border-color: var(--accent);
+  background: var(--accentbg);
+  color: var(--accent);
+}
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+.project-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.project-head { display: flex; gap: 12px; align-items: flex-start; }
+.project-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.project-title { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.35; }
+.project-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.project-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  background: var(--bg2);
+}
+.project-tag.easy { background: var(--greenbg); color: var(--green); border-color: rgba(62,207,142,0.25); }
+.project-tag.medium { background: var(--amberbg); color: var(--amber); border-color: rgba(245,166,35,0.25); }
+.project-tag.hard { background: var(--redbg); color: var(--red); border-color: rgba(245,96,96,0.25); }
+.project-summary { color: var(--text2); font-size: 13px; line-height: 1.7; }
+.project-section { display: flex; flex-direction: column; gap: 7px; }
+.project-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.project-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.project-list li {
+  color: var(--text2);
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.project-empty {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  color: var(--text2);
+  font-size: 13px;
+}
+
+.progress-section { margin-top: 2.5rem; }
+.progress-title { font-size: 13px; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+.prog-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.prog-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--text3); }
+.prog-track { height: 5px; background: var(--bg3); border-radius: 10px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 10px; background: var(--accent); transition: width 0.4s ease; }
+
+/* ── grade table ── */
+.grade-module { margin-bottom: 2rem; }
+.grade-module-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--accent);
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  margin-bottom: 10px; display: flex; justify-content: space-between;
+}
+.grade-table { width: 100%; border-collapse: collapse; }
+.grade-table th {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text3);
+  padding: 6px 12px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.grade-table td {
+  padding: 9px 12px; font-size: 13px; color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+.grade-table tr:last-child td { border-bottom: none; }
+.grade-table tr:hover td { background: var(--bg2); }
+.grade-table .ch-num { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.grade-table .disc-main { color: var(--text); font-weight: 500; }
+
+.grade-total {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1rem 1.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 1rem;
+}
+.grade-total-label { font-size: 13px; color: var(--text2); }
+.grade-total-num {
+  font-size: 22px; font-weight: 700; color: var(--accent);
+  font-family: var(--mono);
+}
+
+/* ── mobile ── */
+@media (max-width: 768px) {
+  .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+  .shell { flex-direction: column; }
+  .main { margin-left: 0; }
+  .section { width: 100%; padding: 1.5rem 1.25rem 3rem; }
+  .study-kit { grid-template-columns: 1fr; }
+  .project-controls { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 22px; }
+  .hero-stats { gap: 1.5rem; }
+  .phase-row { grid-template-columns: 120px 1fr; }
+}
+@media (max-width: 560px) {
+  .apos-header { align-items: flex-start; padding: 0.9rem 1rem; }
+  .apos-body { padding: 1rem; }
+  .phase-row { grid-template-columns: 1fr; margin-left: 10px; }
+  .phase-label { padding-bottom: 0; }
+  .phase-body { padding-left: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">ADS — 2025</div>
+    <h1>Guia de Programação</h1>
+    <p>Para iniciantes no curso de ADS</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Início</div>
+    <div class="nav-link active" onclick="showSection('home')">
+      <span class="nav-icon">🏠</span> Visão geral
+    </div>
+
+    <div class="nav-section-label">Grade Oficial</div>
+    <div class="nav-link" onclick="showSection('grade')">
+      <span class="nav-icon">📋</span> Matriz curricular
+    </div>
+    <div class="nav-link" onclick="showSection('roadmap')">
+      <span class="nav-icon">🗺️</span> Roadmap semestral
+    </div>
+
+    <div class="nav-section-label">Conteúdo</div>
+    <div class="nav-link" onclick="showSection('topicos')">
+      <span class="nav-icon">🧩</span> Tópicos essenciais
+    </div>
+    <div class="nav-link" onclick="showSection('apostilas')">
+      <span class="nav-icon">📖</span> Apostilas
+    </div>
+    <div class="nav-link" onclick="showSection('linguagens')">
+      <span class="nav-icon">💻</span> Linguagens
+    </div>
+
+    <div class="nav-link" onclick="showSection('projetos')">
+      <span class="nav-icon">P</span> Projetos
+    </div>
+
+    <div class="nav-section-label">Progresso</div>
+    <div class="nav-link" onclick="showSection('checklist')">
+      <span class="nav-icon">✅</span> Checklist
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    Baseado na grade oficial &mdash; 2.010h total
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- HOME -->
+<section id="home" class="section active">
+  <div class="hero">
+    <div class="hero-badge">📚 Análise e Desenvolvimento de Sistemas</div>
+    <h1>Guia completo para<br><span>iniciantes em ADS</span></h1>
+    <p>Do zero à formatura: mapa de estudos baseado na grade curricular oficial do curso, com apostilas, exemplos práticos e checklist de progresso.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">Semestres</span></div>
+      <div class="stat"><span class="stat-num">2.010h</span><span class="stat-label">Carga horária</span></div>
+      <div class="stat"><span class="stat-num">24</span><span class="stat-label">Disciplinas core</span></div>
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Linguagens</span></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:1.25rem;">
+    <div class="section-eyebrow">Navegue pelo guia</div>
+    <h2 style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px;">Por onde começar?</h2>
+    <p style="font-size:13px;color:var(--text2);">Escolha o que você precisa agora.</p>
+  </div>
+  <div class="cards-row">
+    <div class="mini-card" onclick="showSection('grade')">
+      <div class="mini-card-icon">📋</div>
+      <div class="mini-card-name">Matriz curricular</div>
+      <div class="mini-card-desc">Grade oficial completa com todas as disciplinas e cargas horárias</div>
+    </div>
+    <div class="mini-card" onclick="showSection('roadmap')">
+      <div class="mini-card-icon">🗺️</div>
+      <div class="mini-card-name">Roadmap</div>
+      <div class="mini-card-desc">Caminho visual semestre a semestre com o que estudar em cada fase</div>
+    </div>
+    <div class="mini-card" onclick="showSection('topicos')">
+      <div class="mini-card-icon">🧩</div>
+      <div class="mini-card-name">Tópicos essenciais</div>
+      <div class="mini-card-desc">Subáreas de lógica, POO, banco de dados, web e mais</div>
+    </div>
+    <div class="mini-card" onclick="showSection('apostilas')">
+      <div class="mini-card-icon">📖</div>
+      <div class="mini-card-name">Apostilas</div>
+      <div class="mini-card-desc">Resumos com código real de cada grande tema do curso</div>
+    </div>
+    <div class="mini-card" onclick="showSection('linguagens')">
+      <div class="mini-card-icon">💻</div>
+      <div class="mini-card-name">Linguagens</div>
+      <div class="mini-card-desc">O que entender primeiro em Python, Java, JavaScript, PHP e C</div>
+    </div>
+    <div class="mini-card" onclick="showSection('projetos')">
+      <div class="mini-card-icon">P</div>
+      <div class="mini-card-name">Projetos</div>
+      <div class="mini-card-desc">Ideias pr&aacute;ticas por sub&aacute;rea, dificuldade e entreg&aacute;veis</div>
+    </div>
+    <div class="mini-card" onclick="showSection('checklist')">
+      <div class="mini-card-icon">✅</div>
+      <div class="mini-card-name">Checklist</div>
+      <div class="mini-card-desc">Acompanhe seu progresso marcando o que já domina</div>
+    </div>
+  </div>
+</section>
+
+<!-- GRADE CURRICULAR -->
+<section id="grade" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Grade oficial</div>
+    <h2>Matriz curricular — ADS</h2>
+    <p>Grade curricular completa extraída do documento oficial. 5 semestres, 2.010 horas no total.</p>
+  </div>
+
+  <!-- Módulo I -->
+  <div class="grade-module">
+    <div class="grade-module-title">
+      <span>Módulo I — Introdução &nbsp;|&nbsp; 1º Semestre</span>
+      <span style="font-size:12px;font-weight:400;color:var(--text3);">455h total</span>
+    </div>
+    <table class="grade-table">
+      <thead><tr><th>Disciplina</th><th>Prática</th><th>Teórica</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td class="disc-main">Ambientação em Tecnologia da Informação</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Fundamentos de Sistemas de Informação</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Ética e Direitos Humanos: Diversidade, Inclusão e Sustentabilidade</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Fundamentos de Administração e Gestão</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Lógica de Programação</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Atividade Presencial Interdisciplinar I</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+        <tr><td>Atividades Extensionistas I</td><td class="ch-num">45h</td><td class="ch-num">—</td><td class="ch-num">45h</td></tr>
+        <tr><td>Avaliação Interdisciplinar I</td><td class="ch-num">30h</td><td class="ch-num">—</td><td class="ch-num">30h</td></tr>
+        <tr><td>Eletiva I</td><td class="ch-num">—</td><td class="ch-num">35h</td><td class="ch-num">35h</td></tr>
+        <tr><td>Atividades Complementares I</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Módulo II -->
+  <div class="grade-module">
+    <div class="grade-module-title">
+      <span>Módulo II — Desenvolvimento de Sistemas e Banco de Dados &nbsp;|&nbsp; 2º Semestre</span>
+      <span style="font-size:12px;font-weight:400;color:var(--text3);">425h total</span>
+    </div>
+    <table class="grade-table">
+      <thead><tr><th>Disciplina</th><th>Prática</th><th>Teórica</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td class="disc-main">Programação Orientada a Objetos</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Algoritmos e Estruturas de Dados</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Libras — Língua Brasileira de Sinais</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Sistemas de Banco de Dados</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Engenharia de Software I</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Atividade Presencial Interdisciplinar II</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+        <tr><td>Atividades Extensionistas II</td><td class="ch-num">45h</td><td class="ch-num">—</td><td class="ch-num">45h</td></tr>
+        <tr><td>Eletiva II</td><td class="ch-num">—</td><td class="ch-num">35h</td><td class="ch-num">35h</td></tr>
+        <tr><td>Atividades Complementares II</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Módulo III -->
+  <div class="grade-module">
+    <div class="grade-module-title">
+      <span>Módulo III — Desenvolvimento Web &nbsp;|&nbsp; 3º Semestre</span>
+      <span style="font-size:12px;font-weight:400;color:var(--text3);">425h total</span>
+    </div>
+    <table class="grade-table">
+      <thead><tr><th>Disciplina</th><th>Prática</th><th>Teórica</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td class="disc-main">Matemática Discreta</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Desenvolvimento Web</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Banco de Dados Avançado</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Engenharia de Software II</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Redes de Computadores</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Atividade Presencial Interdisciplinar III</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+        <tr><td>Atividades Extensionistas III</td><td class="ch-num">45h</td><td class="ch-num">—</td><td class="ch-num">45h</td></tr>
+        <tr><td>Eletiva III</td><td class="ch-num">—</td><td class="ch-num">35h</td><td class="ch-num">35h</td></tr>
+        <tr><td>Atividades Complementares III</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Módulo IV -->
+  <div class="grade-module">
+    <div class="grade-module-title">
+      <span>Módulo IV — Programação Avançada e Segurança &nbsp;|&nbsp; 4º Semestre</span>
+      <span style="font-size:12px;font-weight:400;color:var(--text3);">390h total</span>
+    </div>
+    <table class="grade-table">
+      <thead><tr><th>Disciplina</th><th>Prática</th><th>Teórica</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td class="disc-main">Programação para Dispositivos Móveis</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Segurança de Sistemas</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Qualidade de Software</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Arquitetura de Software</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Atividade Presencial Interdisciplinar IV</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+        <tr><td>Atividades Extensionistas IV</td><td class="ch-num">45h</td><td class="ch-num">—</td><td class="ch-num">45h</td></tr>
+        <tr><td>Avaliação Interdisciplinar II</td><td class="ch-num">30h</td><td class="ch-num">—</td><td class="ch-num">30h</td></tr>
+        <tr><td>Eletiva IV</td><td class="ch-num">—</td><td class="ch-num">35h</td><td class="ch-num">35h</td></tr>
+        <tr><td>Atividades Complementares IV</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Módulo V -->
+  <div class="grade-module">
+    <div class="grade-module-title">
+      <span>Módulo V — Aplicações Avançadas e Projetos &nbsp;|&nbsp; 5º Semestre</span>
+      <span style="font-size:12px;font-weight:400;color:var(--text3);">325h total</span>
+    </div>
+    <table class="grade-table">
+      <thead><tr><th>Disciplina</th><th>Prática</th><th>Teórica</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td class="disc-main">Sistemas Operacionais</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Metodologias Ágeis</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Big Data e Análise de Dados</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td class="disc-main">Computação em Nuvem</td><td class="ch-num">—</td><td class="ch-num">65h</td><td class="ch-num">65h</td></tr>
+        <tr><td>Atividade Presencial Interdisciplinar V</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+        <tr><td>Atividades Extensionistas V</td><td class="ch-num">45h</td><td class="ch-num">—</td><td class="ch-num">45h</td></tr>
+        <tr><td>Atividades Complementares V</td><td class="ch-num">10h</td><td class="ch-num">—</td><td class="ch-num">10h</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grade-total">
+    <span class="grade-total-label">Carga horária total do curso</span>
+    <span class="grade-total-num">2.010h</span>
+  </div>
+
+  <!-- Eletivas -->
+  <div class="grade-module" style="margin-top:2rem;">
+    <div class="grade-module-title"><span>Disciplinas Eletivas disponíveis</span></div>
+    <table class="grade-table">
+      <thead><tr><th>Semestre</th><th>Disciplina</th><th>CH</th></tr></thead>
+      <tbody>
+        <tr><td>1º</td><td>Branding e Gestão de Marcas</td><td class="ch-num">35h</td></tr>
+        <tr><td>1º</td><td>Finanças Corporativas</td><td class="ch-num">35h</td></tr>
+        <tr><td>1º</td><td>Saúde Coletiva</td><td class="ch-num">35h</td></tr>
+        <tr><td>2º</td><td>Bioestatística</td><td class="ch-num">35h</td></tr>
+        <tr><td>2º</td><td>Desenvolvimento Humano</td><td class="ch-num">35h</td></tr>
+        <tr><td>2º</td><td>Trabalho e Ergonomia</td><td class="ch-num">35h</td></tr>
+        <tr><td>3º</td><td>Ecologia Geral</td><td class="ch-num">35h</td></tr>
+        <tr><td>3º</td><td>Geografia Humana e Econômica</td><td class="ch-num">35h</td></tr>
+        <tr><td>4º</td><td>Antropologia Cultural</td><td class="ch-num">35h</td></tr>
+        <tr><td>4º</td><td>Sistemas de Gestão Ambiental</td><td class="ch-num">35h</td></tr>
+      </tbody>
+    </table>
+    <div class="tip" style="margin-top:10px;">Você deve cursar 2 eletivas obrigatórias: uma no penúltimo semestre (4º) e outra no último (5º).</div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Mapa de estudos</div>
+    <h2>Roadmap semestral</h2>
+    <p>O que estudar em cada semestre, com prioridades e dicas práticas alinhadas à grade oficial.</p>
+  </div>
+
+  <div class="roadmap">
+
+    <div class="phase-row">
+      <div class="phase-label">
+        <span class="phase-mod">Módulo I</span>
+        <span class="phase-sem">1º Semestre</span>
+        <span class="phase-module-name">Introdução</span>
+      </div>
+      <div class="phase-body">
+        <div class="phase-ch">5 disciplinas teóricas + 455h total</div>
+        <div class="phase-disciplines">
+          <div class="discipline-item">
+            <span class="disc-icon">🧠</span>
+            <div class="disc-info">
+              <div class="disc-name">Lógica de Programação</div>
+              <div class="disc-note">A disciplina mais importante do 1º semestre. Aqui você aprende variáveis, condicionais, laços e funções — a base de tudo. Dedique pelo menos 2h extras por semana.</div>
+            </div>
+            <span class="disc-badge core">CORE</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">💻</span>
+            <div class="disc-info">
+              <div class="disc-name">Ambientação em Tecnologia da Informação</div>
+              <div class="disc-note">Panorama da área: hardware, software, sistemas operacionais, carreira em TI. Ótima para entender onde o curso te leva.</div>
+            </div>
+            <span class="disc-badge extra">INTRO</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🖥️</span>
+            <div class="disc-info">
+              <div class="disc-name">Fundamentos de Sistemas de Informação</div>
+              <div class="disc-note">O que é um sistema de informação, tipos (ERP, CRM, BI) e papel no negócio. Contexto para tudo que vem depois.</div>
+            </div>
+            <span class="disc-badge extra">INTRO</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">⚖️</span>
+            <div class="disc-info">
+              <div class="disc-name">Ética e Direitos Humanos / Fundamentos de Administração</div>
+              <div class="disc-note">Formação humanística obrigatória: LGPD, direitos digitais, gestão de projetos e pessoas.</div>
+            </div>
+            <span class="disc-badge extra">FORMAÇÃO</span>
+          </div>
+        </div>
+        <div class="tip">💡 Prioridade máxima: Lógica de Programação. Se travar aqui, revise algoritmos com pseudocódigo e fluxogramas antes de qualquer linguagem real.</div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-label">
+        <span class="phase-mod">Módulo II</span>
+        <span class="phase-sem">2º Semestre</span>
+        <span class="phase-module-name">Sistemas e BD</span>
+      </div>
+      <div class="phase-body">
+        <div class="phase-ch">5 disciplinas teóricas + 425h total</div>
+        <div class="phase-disciplines">
+          <div class="discipline-item">
+            <span class="disc-icon">🔷</span>
+            <div class="disc-info">
+              <div class="disc-name">Programação Orientada a Objetos</div>
+              <div class="disc-note">Os 4 pilares: encapsulamento, herança, polimorfismo e abstração. Geralmente em Java ou Python. É o maior salto conceitual do curso.</div>
+            </div>
+            <span class="disc-badge prog">POO</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">📊</span>
+            <div class="disc-info">
+              <div class="disc-name">Algoritmos e Estruturas de Dados</div>
+              <div class="disc-note">Listas, pilhas, filas, árvores, grafos e algoritmos de ordenação/busca. Essencial para entrevistas técnicas.</div>
+            </div>
+            <span class="disc-badge prog">PROG</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🗃️</span>
+            <div class="disc-info">
+              <div class="disc-name">Sistemas de Banco de Dados</div>
+              <div class="disc-note">Modelo relacional, SQL básico (SELECT, INSERT, UPDATE, DELETE), normalização e modelagem ER. Toda empresa usa banco de dados.</div>
+            </div>
+            <span class="disc-badge db">BD</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">⚙️</span>
+            <div class="disc-info">
+              <div class="disc-name">Engenharia de Software I</div>
+              <div class="disc-note">Ciclo de vida do software, requisitos, UML e documentação. Aprende a planejar antes de codar.</div>
+            </div>
+            <span class="disc-badge core">CORE</span>
+          </div>
+        </div>
+        <div class="tip">💡 Neste semestre você escreve seus primeiros programas reais. Pratique POO criando projetos pequenos: um sistema de cadastro, uma calculadora OO.</div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-label">
+        <span class="phase-mod">Módulo III</span>
+        <span class="phase-sem">3º Semestre</span>
+        <span class="phase-module-name">Web</span>
+      </div>
+      <div class="phase-body">
+        <div class="phase-ch">5 disciplinas teóricas + 425h total</div>
+        <div class="phase-disciplines">
+          <div class="discipline-item">
+            <span class="disc-icon">🌐</span>
+            <div class="disc-info">
+              <div class="disc-name">Desenvolvimento Web</div>
+              <div class="disc-note">HTML, CSS, JavaScript, HTTP, APIs REST e framework web (PHP/Laravel, Node.js ou similar). A disciplina mais prática do semestre.</div>
+            </div>
+            <span class="disc-badge web">WEB</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🗄️</span>
+            <div class="disc-info">
+              <div class="disc-name">Banco de Dados Avançado</div>
+              <div class="disc-note">Otimização de queries, índices, stored procedures, transações, triggers e introdução a NoSQL (MongoDB).</div>
+            </div>
+            <span class="disc-badge db">BD</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🔢</span>
+            <div class="disc-info">
+              <div class="disc-name">Matemática Discreta</div>
+              <div class="disc-note">Conjuntos, lógica proposicional, grafos, combinatória — base teórica de algoritmos e criptografia.</div>
+            </div>
+            <span class="disc-badge extra">TEORIA</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🌍</span>
+            <div class="disc-info">
+              <div class="disc-name">Redes de Computadores</div>
+              <div class="disc-note">TCP/IP, modelo OSI, DNS, HTTP/HTTPS, protocolos e segurança básica de rede. Fundamental para qualquer dev web.</div>
+            </div>
+            <span class="disc-badge infra">INFRA</span>
+          </div>
+        </div>
+        <div class="tip">💡 Momento de montar o portfólio: construa um projeto web completo (front + back + banco) para mostrar aos recrutadores.</div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-label">
+        <span class="phase-mod">Módulo IV</span>
+        <span class="phase-sem">4º Semestre</span>
+        <span class="phase-module-name">Avançado</span>
+      </div>
+      <div class="phase-body">
+        <div class="phase-ch">4 disciplinas teóricas + 390h total</div>
+        <div class="phase-disciplines">
+          <div class="discipline-item">
+            <span class="disc-icon">📱</span>
+            <div class="disc-info">
+              <div class="disc-name">Programação para Dispositivos Móveis</div>
+              <div class="disc-note">Android (Kotlin/Java) ou React Native/Flutter. App mobile no portfólio é um diferencial enorme no mercado.</div>
+            </div>
+            <span class="disc-badge prog">MOBILE</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🔐</span>
+            <div class="disc-info">
+              <div class="disc-name">Segurança de Sistemas</div>
+              <div class="disc-note">OWASP Top 10, autenticação, criptografia, SQL injection, XSS, HTTPS e LGPD aplicada. Todo dev precisa saber isso.</div>
+            </div>
+            <span class="disc-badge infra">SEGURANÇA</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🧪</span>
+            <div class="disc-info">
+              <div class="disc-name">Qualidade de Software</div>
+              <div class="disc-note">Testes unitários, integração, QA, TDD, cobertura de código e revisão de código (code review).</div>
+            </div>
+            <span class="disc-badge core">QA</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🏗️</span>
+            <div class="disc-info">
+              <div class="disc-name">Arquitetura de Software</div>
+              <div class="disc-note">Padrões de design (MVC, SOLID, Design Patterns), microsserviços, monolito vs. distribuído e clean architecture.</div>
+            </div>
+            <span class="disc-badge core">ARQ</span>
+          </div>
+        </div>
+        <div class="tip">💡 Aqui você já pode estar estagiando. Leve os projetos de mobile e segurança para o portfólio — são os que mais impressionam recrutadores.</div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-label">
+        <span class="phase-mod">Módulo V</span>
+        <span class="phase-sem">5º Semestre</span>
+        <span class="phase-module-name">Especialização</span>
+      </div>
+      <div class="phase-body">
+        <div class="phase-ch">4 disciplinas teóricas + 325h total</div>
+        <div class="phase-disciplines">
+          <div class="discipline-item">
+            <span class="disc-icon">⚙️</span>
+            <div class="disc-info">
+              <div class="disc-name">Sistemas Operacionais</div>
+              <div class="disc-note">Processos, threads, gerência de memória, sistemas de arquivos, Linux — base para DevOps e cloud.</div>
+            </div>
+            <span class="disc-badge infra">INFRA</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">🔄</span>
+            <div class="disc-info">
+              <div class="disc-name">Metodologias Ágeis</div>
+              <div class="disc-note">Scrum, Kanban, XP, sprints, backlog, daily e retrospectiva. O mercado usa Scrum em 80% dos projetos de software.</div>
+            </div>
+            <span class="disc-badge core">ÁGIL</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">📈</span>
+            <div class="disc-info">
+              <div class="disc-name">Big Data e Análise de Dados</div>
+              <div class="disc-note">Hadoop, Spark, Python para dados (Pandas, NumPy), visualização (Power BI / Tableau) e SQL analítico.</div>
+            </div>
+            <span class="disc-badge db">DADOS</span>
+          </div>
+          <div class="discipline-item">
+            <span class="disc-icon">☁️</span>
+            <div class="disc-info">
+              <div class="disc-name">Computação em Nuvem</div>
+              <div class="disc-note">AWS, Azure ou GCP: IaaS, PaaS, SaaS, containers (Docker), orquestração (Kubernetes) e CI/CD.</div>
+            </div>
+            <span class="disc-badge infra">CLOUD</span>
+          </div>
+        </div>
+        <div class="tip">💡 Último semestre: finalize o portfólio, obtenha uma certificação (AWS Cloud Practitioner, Google Associate) e prepare o LinkedIn.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TÓPICOS -->
+<section id="topicos" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Subáreas</div>
+    <h2>Tópicos essenciais</h2>
+    <p>Clique em um tópico para ver o que estudar dentro de cada grande área do curso.</p>
+  </div>
+  <div class="topics-grid" id="topicGrid"></div>
+  <div id="topicDetail"></div>
+</section>
+
+<!-- APOSTILAS -->
+<section id="apostilas" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Material de estudo</div>
+    <h2>Apostilas</h2>
+    <p>Resumos dos conceitos mais importantes com exemplos de código reais. Clique para expandir cada apostila.</p>
+  </div>
+  <div class="apostila-accordion" id="apostilaList"></div>
+</section>
+
+<!-- LINGUAGENS -->
+<section id="linguagens" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Linguagens de programação</div>
+    <h2>O básico de cada linguagem</h2>
+    <p>Selecione uma linguagem para ver o que você precisa entender primeiro, por que aprender e um exemplo mínimo funcional.</p>
+  </div>
+  <div class="lang-selector" id="langSelector"></div>
+  <div id="langPanels"></div>
+</section>
+
+<!-- CHECKLIST -->
+<section id="projetos" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Portf&oacute;lio pr&aacute;tico</div>
+    <h2>Projetos por sub&aacute;rea e dificuldade</h2>
+    <p>Escolha uma sub&aacute;rea e um n&iacute;vel. Cada projeto explica como deve funcionar, quais recursos precisa ter e o que entregar no final.</p>
+  </div>
+  <div class="project-controls">
+    <div class="control-group">
+      <div class="control-label">Sub&aacute;rea</div>
+      <div class="project-filter-row" id="projectAreaFilters"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Dificuldade</div>
+      <div class="project-filter-row" id="projectLevelFilters"></div>
+    </div>
+  </div>
+  <div class="projects-grid" id="projectsGrid"></div>
+</section>
+
+<!-- CHECKLIST -->
+<section id="checklist" class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Acompanhamento</div>
+    <h2>Checklist de progresso</h2>
+    <p>Marque o que você já domina. Seu progresso fica salvo enquanto o site estiver aberto.</p>
+  </div>
+  <div id="checklistContent"></div>
+  <div class="progress-section">
+    <div class="progress-title">Progresso por área</div>
+    <div id="progressBars"></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// ── Navigation ──
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── Topics data ──
+const TOPICS = [
+  {
+    emoji:'🧠', name:'Lógica de programação', desc:'Base absoluta — 1º semestre',
+    disciplina: 'Lógica de Programação (Módulo I)',
+    subs:[
+      {t:'Variáveis e tipos',d:'int, float, string, bool — o que são e como a memória os guarda. Sem isso, nenhum programa funciona.'},
+      {t:'Operadores',d:'Aritméticos (+−*/%%), relacionais (==,!=,>,<) e lógicos (&&, ||, !) — combine-os para criar condições.'},
+      {t:'Estruturas de decisão',d:'if / else if / else e switch-case. Aprenda a pensar em "casos" antes de codificar.'},
+      {t:'Laços de repetição',d:'while, do-while e for. Sempre garanta a condição de parada — evite laços infinitos.'},
+      {t:'Funções / subprogramas',d:'Parâmetros, retorno de valor e escopo. Quebre o problema em partes menores e nomeie cada uma.'},
+      {t:'Arrays e matrizes',d:'Coleções indexadas de valores. Percorra com laço e use para armazenar listas de dados.'},
+      {t:'Fluxogramas e pseudocódigo',d:'Visualize o algoritmo antes de codificar. Economiza horas de debug depois.'},
+    ]
+  },
+  {
+    emoji:'🔷', name:'POO', desc:'Paradigma central — 2º semestre',
+    disciplina: 'Programação Orientada a Objetos (Módulo II)',
+    subs:[
+      {t:'Classe e objeto',d:'Classe é o molde, objeto é a instância. Atributos guardam estado; métodos definem comportamento.'},
+      {t:'Encapsulamento',d:'private, protected, public. Oculte o estado interno e exponha só o necessário via getters/setters.'},
+      {t:'Herança',d:'extends / super. Reutilize e especialize — mas cuidado com herança profunda, prefira composição.'},
+      {t:'Polimorfismo',d:'Sobrecarga (overload) e sobrescrita (override). Mesmo nome de método, comportamentos diferentes.'},
+      {t:'Abstração',d:'Classes abstratas e interfaces — contratos que guiam o design sem forçar implementação.'},
+      {t:'Construtores',d:'Inicialização controlada do objeto. Garanta que o estado seja sempre válido ao criar uma instância.'},
+      {t:'Princípios SOLID',d:'5 regras para código OO de qualidade: Responsabilidade Única, Aberto/Fechado, Liskov, Interface, Inversão.'},
+    ]
+  },
+  {
+    emoji:'🗃️', name:'Banco de dados', desc:'SQL e modelagem — 2º e 3º semestre',
+    disciplina: 'Sistemas de BD (Mod. II) + BD Avançado (Mod. III)',
+    subs:[
+      {t:'Modelo relacional',d:'Tabelas, linhas, colunas. Chave Primária (PK) identifica; Chave Estrangeira (FK) relaciona.'},
+      {t:'SQL básico (DML)',d:'SELECT, INSERT, UPDATE, DELETE — os 4 comandos que você usará todo dia.'},
+      {t:'Filtros e ordenação',d:'WHERE, ORDER BY, GROUP BY, HAVING e funções de agregação (COUNT, SUM, AVG, MAX, MIN).'},
+      {t:'JOINs',d:'INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN — como cruzar dados de múltiplas tabelas.'},
+      {t:'Normalização',d:'1FN, 2FN, 3FN — regras para eliminar redundância e anomalias de inserção/atualização/exclusão.'},
+      {t:'Transações e ACID',d:'Atomicidade, Consistência, Isolamento, Durabilidade. O banco garante esses 4 ou desfaz tudo.'},
+      {t:'BD Avançado',d:'Índices, stored procedures, triggers, views, cursores e introdução ao NoSQL (MongoDB, Redis).'},
+    ]
+  },
+  {
+    emoji:'📌', name:'Algoritmos e estruturas',desc:'Pensamento computacional — 2º semestre',
+    disciplina: 'Algoritmos e Estruturas de Dados (Módulo II)',
+    subs:[
+      {t:'Complexidade Big-O',d:'O(1), O(log n), O(n), O(n²) — meça a eficiência antes de escolher o algoritmo.'},
+      {t:'Array / lista ligada',d:'Array: acesso O(1), insert O(n). Lista ligada: insert O(1), acesso O(n). Use o certo para cada caso.'},
+      {t:'Pilha (Stack) — LIFO',d:'push/pop. Usos: undo/redo, chamadas de função recursivas, parsing de expressões.'},
+      {t:'Fila (Queue) — FIFO',d:'enqueue/dequeue. Usos: fila de impressão, BFS, sistemas de mensagens (RabbitMQ).'},
+      {t:'Árvore binária',d:'Hierarquia pai-filho. Travessia: in-order, pré-order, pós-order. Busca em O(log n) se balanceada.'},
+      {t:'Hash map / dicionário',d:'Busca, inserção e remoção em O(1) amortizado. Base de objetos em JS, dicts em Python.'},
+      {t:'Algoritmos de ordenação',d:'Bubble O(n²), Selection O(n²), Merge Sort O(n log n), Quick Sort O(n log n) — saiba a diferença.'},
+    ]
+  },
+  {
+    emoji:'🌐', name:'Desenvolvimento Web',desc:'Front e back-end — 3º semestre',
+    disciplina: 'Desenvolvimento Web (Módulo III)',
+    subs:[
+      {t:'HTML semântico',d:'Tags de estrutura (<header>, <main>, <article>), formulários e acessibilidade (ARIA).'},
+      {t:'CSS — box model e layout',d:'margin, padding, border, Flexbox e Grid. Entender o box model resolve 80% dos problemas de layout.'},
+      {t:'JavaScript essencial',d:'let/const, arrow functions, DOM, eventos (click, submit), async/await e fetch API.'},
+      {t:'HTTP e REST',d:'Verbos (GET, POST, PUT, DELETE), status codes (200, 404, 500) e estrutura de uma API REST.'},
+      {t:'Back-end básico',d:'Servidor web, rotas, MVC, middleware e conexão com banco de dados via ORM ou PDO.'},
+      {t:'Responsividade',d:'Media queries, unidades relativas (rem, %, vw) e design mobile-first.'},
+    ]
+  },
+  {
+    emoji:'☁️', name:'Cloud e infra',desc:'Nuvem e redes — 3º ao 5º semestre',
+    disciplina: 'Redes (Mod. III) + Computação em Nuvem (Mod. V)',
+    subs:[
+      {t:'TCP/IP e modelo OSI',d:'7 camadas. Na prática: entenda IP, TCP, UDP, DNS, HTTP e HTTPS.'},
+      {t:'Linux básico',d:'Navegação (cd, ls, cat), permissões (chmod), processos (ps, kill) e shell scripting.'},
+      {t:'Docker e containers',d:'Imagem vs container, Dockerfile, docker-compose — isolamento de ambientes de desenvolvimento.'},
+      {t:'IaaS, PaaS, SaaS',d:'Nuvem pública (AWS, Azure, GCP): EC2/VMs, S3/Blob Storage, RDS/Cloud SQL.'},
+      {t:'CI/CD',d:'Pipeline: build → test → deploy automático. GitHub Actions, GitLab CI ou Jenkins.'},
+      {t:'Segurança de redes',d:'Firewall, VPN, HTTPS/TLS, certificados SSL e boas práticas OWASP.'},
+    ]
+  },
+];
+
+// ── Apostilas data ──
+const APOSTILAS = [
+  {
+    icon:'🧠', bg:'rgba(91,127,255,0.15)', title:'Lógica de Programação — fundamentos',
+    sub:'Disciplina: Lógica de Programação — 1º semestre',
+    concepts:[
+      {label:'CONCEITO 1',t:'O que é um algoritmo',
+       text:'Sequência finita, ordenada e não ambígua de passos para resolver um problema. Todo programa de computador é um algoritmo escrito em uma linguagem que a máquina entende.',
+       code:`<span class="cm">// Algoritmo: calcular média de três notas</span>
+<span class="cm">// (pseudocódigo — sem linguagem específica)</span>
+<span class="kw">INÍCIO</span>
+  <span class="fn">LER</span> nota1, nota2, nota3
+  media ← (nota1 + nota2 + nota3) / <span class="num">3</span>
+  <span class="kw">SE</span> media >= <span class="num">7</span> <span class="kw">ENTÃO</span>
+    <span class="fn">ESCREVER</span> <span class="str">"Aprovado"</span>
+  <span class="kw">SENÃO</span>
+    <span class="fn">ESCREVER</span> <span class="str">"Reprovado"</span>
+  <span class="kw">FIM SE</span>
+<span class="kw">FIM</span>`
+      },
+      {label:'CONCEITO 2',t:'Variáveis e tipos de dados',
+       text:'Variável é um espaço nomeado na memória que guarda um valor que pode mudar. O tipo define quais valores cabem lá e quanto espaço reservar.',
+       code:`<span class="cm"># Python — tipagem dinâmica</span>
+idade   = <span class="num">20</span>          <span class="cm"># int — número inteiro</span>
+altura  = <span class="num">1.75</span>        <span class="cm"># float — decimal</span>
+nome    = <span class="str">'Maria'</span>     <span class="cm"># str — texto</span>
+ativo   = <span class="kw">True</span>         <span class="cm"># bool — verdadeiro/falso</span>
+
+<span class="cm">// Java — tipagem estática (obriga declarar o tipo)</span>
+<span class="kw">int</span>    idade  = <span class="num">20</span>;
+<span class="kw">double</span> altura = <span class="num">1.75</span>;
+<span class="fn">String</span> nome   = <span class="str">"Maria"</span>;
+<span class="kw">boolean</span> ativo = <span class="kw">true</span>;`
+      },
+      {label:'CONCEITO 3',t:'Laços de repetição',
+       text:'Executam um bloco de código múltiplas vezes enquanto uma condição for verdadeira. Sempre garanta que a condição de parada será atingida — senão você cria um laço infinito.',
+       code:`<span class="cm"># for — quando você sabe quantas vezes repetir</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>):
+    <span class="fn">print</span>(i)   <span class="cm"># imprime 1, 2, 3, 4, 5</span>
+
+<span class="cm"># while — quando você não sabe quantas vezes</span>
+tentativas = <span class="num">0</span>
+<span class="kw">while</span> tentativas < <span class="num">3</span>:
+    senha = <span class="fn">input</span>(<span class="str">"Digite a senha: "</span>)
+    <span class="kw">if</span> senha == <span class="str">"1234"</span>:
+        <span class="kw">break</span>
+    tentativas += <span class="num">1</span>`
+      },
+      {label:'CONCEITO 4',t:'Funções',
+       text:'Bloco nomeado de código que executa uma tarefa e pode retornar um resultado. Permite reutilizar código, dividir o problema em partes e facilitar a manutenção.',
+       code:`<span class="kw">def</span> <span class="fn">calcular_imc</span>(peso, altura):
+    <span class="str">"""Calcula o Índice de Massa Corporal."""</span>
+    imc = peso / (altura ** <span class="num">2</span>)
+    <span class="kw">return</span> <span class="fn">round</span>(imc, <span class="num">1</span>)
+
+<span class="kw">def</span> <span class="fn">classificar_imc</span>(imc):
+    <span class="kw">if</span> imc < <span class="num">18.5</span>:  <span class="kw">return</span> <span class="str">"Abaixo do peso"</span>
+    <span class="kw">elif</span> imc < <span class="num">25</span>:  <span class="kw">return</span> <span class="str">"Normal"</span>
+    <span class="kw">elif</span> imc < <span class="num">30</span>:  <span class="kw">return</span> <span class="str">"Sobrepeso"</span>
+    <span class="kw">else</span>:           <span class="kw">return</span> <span class="str">"Obesidade"</span>
+
+resultado = <span class="fn">calcular_imc</span>(<span class="num">70</span>, <span class="num">1.75</span>)
+<span class="fn">print</span>(<span class="fn">classificar_imc</span>(resultado))  <span class="cm"># Normal</span>`
+      },
+    ]
+  },
+  {
+    icon:'🔷', bg:'rgba(167,139,250,0.15)', title:'POO — os quatro pilares',
+    sub:'Disciplina: Programação Orientada a Objetos — 2º semestre',
+    concepts:[
+      {label:'PILAR 1',t:'Encapsulamento',
+       text:'Ocultar os detalhes internos de uma classe e expor apenas o necessário. Protege o estado do objeto e evita que código externo quebre invariantes.',
+       code:`<span class="kw">public class</span> <span class="fn">ContaBancaria</span> {
+  <span class="kw">private double</span> saldo;  <span class="cm">// ninguém acessa direto</span>
+
+  <span class="kw">public</span> <span class="fn">ContaBancaria</span>(<span class="kw">double</span> saldoInicial) {
+    <span class="kw">if</span> (saldoInicial < <span class="num">0</span>) <span class="kw">throw new</span> <span class="fn">IllegalArgumentException</span>();
+    <span class="kw">this</span>.saldo = saldoInicial;
+  }
+
+  <span class="kw">public double</span> <span class="fn">getSaldo</span>() { <span class="kw">return</span> saldo; }
+
+  <span class="kw">public void</span> <span class="fn">depositar</span>(<span class="kw">double</span> valor) {
+    <span class="kw">if</span> (valor > <span class="num">0</span>) saldo += valor;
+  }
+
+  <span class="kw">public boolean</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) {
+    <span class="kw">if</span> (valor > <span class="num">0</span> && valor <= saldo) { saldo -= valor; <span class="kw">return true</span>; }
+    <span class="kw">return false</span>;
+  }
+}`
+      },
+      {label:'PILAR 2',t:'Herança',
+       text:'Uma classe filha herda atributos e métodos da classe pai. Use quando existe uma relação "É UM" genuína — Cachorro É UM Animal, por exemplo.',
+       code:`<span class="kw">class</span> <span class="fn">Animal</span> {
+  <span class="fn">String</span> nome;
+  <span class="kw">int</span> idade;
+
+  <span class="kw">void</span> <span class="fn">emitirSom</span>() { <span class="fn">System</span>.out.<span class="fn">println</span>(<span class="str">"..."</span>); }
+  <span class="fn">String</span> <span class="fn">descrever</span>() { <span class="kw">return</span> nome + <span class="str">", "</span> + idade + <span class="str">" anos"</span>; }
+}
+
+<span class="kw">class</span> <span class="fn">Cachorro</span> <span class="kw">extends</span> <span class="fn">Animal</span> {
+  <span class="fn">String</span> raca;
+
+  <span class="kw">@Override</span>
+  <span class="kw">void</span> <span class="fn">emitirSom</span>() { <span class="fn">System</span>.out.<span class="fn">println</span>(<span class="str">"Au au!"</span>); }
+}
+
+<span class="fn">Cachorro</span> dog = <span class="kw">new</span> <span class="fn">Cachorro</span>();
+dog.nome = <span class="str">"Rex"</span>;  <span class="cm">// herdado de Animal</span>
+dog.<span class="fn">emitirSom</span>();   <span class="cm">// Au au!</span>`
+      },
+      {label:'PILAR 3',t:'Polimorfismo',
+       text:'O mesmo método se comporta diferente dependendo do objeto concreto. Permite escrever código genérico que funciona para múltiplos tipos.',
+       code:`<span class="fn">Animal</span>[] animais = {
+  <span class="kw">new</span> <span class="fn">Cachorro</span>(),
+  <span class="kw">new</span> <span class="fn">Gato</span>(),
+  <span class="kw">new</span> <span class="fn">Papagaio</span>()
+};
+
+<span class="cm">// O mesmo código funciona para todos os tipos</span>
+<span class="kw">for</span> (<span class="fn">Animal</span> a : animais) {
+  a.<span class="fn">emitirSom</span>();  <span class="cm">// Au! / Miau! / Lorito quer biscoito!</span>
+}
+
+<span class="cm">// Polimorfismo em interfaces</span>
+<span class="kw">interface</span> <span class="fn">Pagavel</span> { <span class="kw">double</span> <span class="fn">calcularValor</span>(); }
+
+<span class="kw">class</span> <span class="fn">Boleto</span> <span class="kw">implements</span> <span class="fn">Pagavel</span> { ... }
+<span class="kw">class</span> <span class="fn">Cartao</span> <span class="kw">implements</span> <span class="fn">Pagavel</span> { ... }
+<span class="kw">class</span> <span class="fn">Pix</span> <span class="kw">implements</span> <span class="fn">Pagavel</span> { ... }`
+      },
+      {label:'PILAR 4',t:'Abstração',
+       text:'Modelar apenas o que é relevante para o problema, ignorando detalhes desnecessários. Classes abstratas e interfaces são os mecanismos.',
+       code:`<span class="cm">// Classe abstrata — define contrato + comportamento parcial</span>
+<span class="kw">abstract class</span> <span class="fn">Forma</span> {
+  <span class="fn">String</span> cor;
+  <span class="kw">abstract double</span> <span class="fn">calcularArea</span>();     <span class="cm">// obrigatório implementar</span>
+  <span class="kw">abstract double</span> <span class="fn">calcularPerimetro</span>();
+
+  <span class="fn">String</span> <span class="fn">descrever</span>() {               <span class="cm">// comportamento concreto</span>
+    <span class="kw">return</span> <span class="str">"Área: "</span> + <span class="fn">calcularArea</span>();
+  }
+}
+
+<span class="kw">class</span> <span class="fn">Circulo</span> <span class="kw">extends</span> <span class="fn">Forma</span> {
+  <span class="kw">double</span> raio;
+  <span class="kw">double</span> <span class="fn">calcularArea</span>()      { <span class="kw">return</span> <span class="fn">Math</span>.PI * raio * raio; }
+  <span class="kw">double</span> <span class="fn">calcularPerimetro</span>() { <span class="kw">return</span> <span class="num">2</span> * <span class="fn">Math</span>.PI * raio; }
+}`
+      },
+    ]
+  },
+  {
+    icon:'🗃️', bg:'rgba(62,207,142,0.15)', title:'Banco de Dados — SQL na prática',
+    sub:'Disciplinas: Sistemas de BD (2º sem.) + BD Avançado (3º sem.)',
+    concepts:[
+      {label:'DDL',t:'Criar tabelas (CREATE TABLE)',
+       text:'Data Definition Language: define a estrutura do banco. Execute primeiro — antes de inserir qualquer dado.',
+       code:`<span class="kw">CREATE TABLE</span> clientes (
+  id       <span class="fn">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+  nome     <span class="fn">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  email    <span class="fn">VARCHAR</span>(<span class="num">150</span>) <span class="kw">UNIQUE NOT NULL</span>,
+  cpf      <span class="fn">CHAR</span>(<span class="num">11</span>)    <span class="kw">UNIQUE</span>,
+  criado   <span class="fn">DATETIME</span>    <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+
+<span class="kw">CREATE TABLE</span> pedidos (
+  id          <span class="fn">INT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+  cliente_id  <span class="fn">INT</span> <span class="kw">NOT NULL</span>,
+  total       <span class="fn">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+  <span class="kw">FOREIGN KEY</span> (cliente_id) <span class="kw">REFERENCES</span> clientes(id)
+);`
+      },
+      {label:'DML',t:'Manipular dados (INSERT / UPDATE / DELETE)',
+       text:'Data Manipulation Language: sempre use WHERE no UPDATE e DELETE — sem WHERE, você afeta TODAS as linhas da tabela.',
+       code:`<span class="cm">-- Inserir</span>
+<span class="kw">INSERT INTO</span> clientes (nome, email, cpf)
+<span class="kw">VALUES</span> (<span class="str">'Ana Silva'</span>, <span class="str">'ana@email.com'</span>, <span class="str">'12345678901'</span>);
+
+<span class="cm">-- Atualizar (SEMPRE com WHERE!)</span>
+<span class="kw">UPDATE</span> clientes
+<span class="kw">SET</span>   email = <span class="str">'ana.nova@email.com'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cm">-- Excluir (SEMPRE com WHERE!)</span>
+<span class="kw">DELETE FROM</span> clientes
+<span class="kw">WHERE</span> id = <span class="num">5</span>;
+
+<span class="cm">-- ⚠️ NUNCA faça isso em produção:</span>
+<span class="cm">-- DELETE FROM clientes;  (apaga TUDO!)</span>`
+      },
+      {label:'DQL',t:'Consultar dados com SELECT + JOIN',
+       text:'O comando mais usado. JOIN combina dados de múltiplas tabelas a partir de chaves relacionadas.',
+       code:`<span class="cm">-- SELECT básico com filtro e ordenação</span>
+<span class="kw">SELECT</span> nome, email
+<span class="kw">FROM</span>   clientes
+<span class="kw">WHERE</span>  criado >= <span class="str">'2025-01-01'</span>
+<span class="kw">ORDER BY</span> nome <span class="kw">ASC</span>;
+
+<span class="cm">-- INNER JOIN — só traz clientes que TÊM pedidos</span>
+<span class="kw">SELECT</span> c.nome, p.total, p.id <span class="kw">AS</span> pedido
+<span class="kw">FROM</span>   clientes c
+<span class="kw">INNER JOIN</span> pedidos p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">WHERE</span>  p.total > <span class="num">100</span>
+<span class="kw">ORDER BY</span> p.total <span class="kw">DESC</span>;
+
+<span class="cm">-- Agregação: total gasto por cliente</span>
+<span class="kw">SELECT</span> c.nome, <span class="fn">SUM</span>(p.total) <span class="kw">AS</span> total_gasto
+<span class="kw">FROM</span>   clientes c
+<span class="kw">LEFT JOIN</span> pedidos p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id, c.nome
+<span class="kw">HAVING</span>   <span class="fn">SUM</span>(p.total) > <span class="num">500</span>;`
+      },
+    ]
+  },
+  {
+    icon:'📌', bg:'rgba(245,166,35,0.15)', title:'Ponteiros e memória — conceitos em C',
+    sub:'Conteúdo de apoio — base para entender Java, Python e sistemas',
+    concepts:[
+      {label:'CONCEITO 1',t:'O que é um ponteiro',
+       text:'Uma variável que armazena o endereço de memória de outra variável. Pense como um post-it com o número do apartamento — não o apartamento em si.',
+       code:`<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">int</span>  x = <span class="num">42</span>;     <span class="cm">// variável comum</span>
+  <span class="kw">int</span> *p = &x;     <span class="cm">// p guarda o endereço de x</span>
+
+  <span class="fn">printf</span>(<span class="str">"%d\n"</span>,  x);  <span class="cm">// 42       — o valor</span>
+  <span class="fn">printf</span>(<span class="str">"%p\n"</span>,  p);  <span class="cm">// 0x7ff...  — o endereço</span>
+  <span class="fn">printf</span>(<span class="str">"%d\n"</span>, *p);  <span class="cm">// 42       — derreferência</span>
+
+  *p = <span class="num">100</span>;             <span class="cm">// altera x via ponteiro</span>
+  <span class="fn">printf</span>(<span class="str">"%d\n"</span>,  x);  <span class="cm">// 100</span>
+  <span class="kw">return</span> <span class="num">0</span>;
+}`
+      },
+      {label:'CONCEITO 2',t:'Passar por referência',
+       text:'Funções em C recebem cópias dos valores. Com ponteiros, passamos o endereço — a função modifica o original, não uma cópia.',
+       code:`<span class="kw">void</span> <span class="fn">trocar</span>(<span class="kw">int</span> *a, <span class="kw">int</span> *b) {
+  <span class="kw">int</span> temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">int</span> x = <span class="num">5</span>, y = <span class="num">10</span>;
+  <span class="fn">printf</span>(<span class="str">"Antes: %d %d\n"</span>, x, y);  <span class="cm">// 5 10</span>
+  <span class="fn">trocar</span>(&x, &y);                   <span class="cm">// passa endereços</span>
+  <span class="fn">printf</span>(<span class="str">"Depois: %d %d\n"</span>, x, y); <span class="cm">// 10 5</span>
+  <span class="kw">return</span> <span class="num">0</span>;
+}`
+      },
+      {label:'CONCEITO 3',t:'Alocação dinâmica',
+       text:'malloc reserva memória em tempo de execução. SEMPRE libere com free — esquecê-lo causa memory leak, um dos bugs mais difíceis de encontrar.',
+       code:`<span class="kw">#include</span> <span class="str">&lt;stdlib.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">int</span> n = <span class="num">5</span>;
+
+  <span class="cm">// aloca array de n inteiros na heap</span>
+  <span class="kw">int</span> *arr = (<span class="kw">int</span>*) <span class="fn">malloc</span>(n * <span class="kw">sizeof</span>(<span class="kw">int</span>));
+
+  <span class="kw">if</span> (arr == <span class="kw">NULL</span>) {  <span class="cm">// sempre verifique!</span>
+    <span class="fn">fprintf</span>(stderr, <span class="str">"Sem memória\n"</span>);
+    <span class="kw">return</span> <span class="num">1</span>;
+  }
+
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < n; i++) arr[i] = i * <span class="num">10</span>;
+
+  <span class="fn">free</span>(arr);   <span class="cm">// OBRIGATÓRIO — libera a heap</span>
+  arr = <span class="kw">NULL</span>; <span class="cm">// boa prática: evita dangling pointer</span>
+  <span class="kw">return</span> <span class="num">0</span>;
+}`
+      },
+    ]
+  },
+  {
+    icon:'🌐', bg:'rgba(34,211,238,0.15)', title:'Desenvolvimento Web — HTML, CSS e JS',
+    sub:'Disciplina: Desenvolvimento Web — 3º semestre',
+    concepts:[
+      {label:'HTML',t:'Estrutura semântica',
+       text:'HTML define o conteúdo e sua semântica. Use as tags corretas para cada tipo de conteúdo — isso melhora acessibilidade e SEO.',
+       code:`<span class="cm">&lt;!-- Estrutura semântica básica --&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> lang=<span class="str">"pt-BR"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span> charset=<span class="str">"UTF-8"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;meta</span> name=<span class="str">"viewport"</span> content=<span class="str">"width=device-width"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;title&gt;</span>Meu Site<span class="kw">&lt;/title&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+  <span class="kw">&lt;header&gt;</span><span class="kw">&lt;nav&gt;</span>...<span class="kw">&lt;/nav&gt;&lt;/header&gt;</span>
+  <span class="kw">&lt;main&gt;</span>
+    <span class="kw">&lt;article&gt;&lt;h1&gt;</span>Título<span class="kw">&lt;/h1&gt;&lt;p&gt;</span>Conteúdo<span class="kw">&lt;/p&gt;&lt;/article&gt;</span>
+  <span class="kw">&lt;/main&gt;</span>
+  <span class="kw">&lt;footer&gt;</span>...<span class="kw">&lt;/footer&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span>`
+      },
+      {label:'CSS',t:'Box model e Flexbox',
+       text:'Todo elemento HTML é uma caixa: content + padding + border + margin. Flexbox distribui elementos em uma linha ou coluna com alinhamento fácil.',
+       code:`<span class="cm">/* Box model */</span>
+.card {
+  width: 300px;
+  padding: 16px;        <span class="cm">/* espaço interno */</span>
+  border: 1px solid #ccc;
+  margin: 12px;         <span class="cm">/* espaço externo */</span>
+  border-radius: 8px;
+}
+
+<span class="cm">/* Flexbox — centralizar e distribuir */</span>
+.container {
+  display: flex;
+  justify-content: space-between; <span class="cm">/* eixo principal */</span>
+  align-items: center;            <span class="cm">/* eixo cruzado */</span>
+  gap: 12px;
+  flex-wrap: wrap;                <span class="cm">/* quebra linha */</span>
+}`
+      },
+      {label:'JavaScript',t:'DOM e fetch API',
+       text:'JavaScript manipula o HTML em tempo real (DOM) e se comunica com servidores via fetch. Entender async/await é essencial.',
+       code:`<span class="cm">// Manipular o DOM</span>
+<span class="kw">const</span> btn = document.<span class="fn">querySelector</span>(<span class="str">'#meu-botao'</span>);
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+  document.<span class="fn">querySelector</span>(<span class="str">'#resultado'</span>).textContent = <span class="str">'Clicado!'</span>;
+});
+
+<span class="cm">// Consumir API REST com async/await</span>
+<span class="kw">async function</span> <span class="fn">buscarUsuario</span>(id) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res  = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">\`https://api.exemplo.com/users/\${id}\`</span>);
+    <span class="kw">const</span> user = <span class="kw">await</span> res.<span class="fn">json</span>();
+    <span class="fn">console</span>.<span class="fn">log</span>(user.nome);
+  } <span class="kw">catch</span> (err) {
+    <span class="fn">console</span>.<span class="fn">error</span>(<span class="str">'Erro:'</span>, err);
+  }
+}`
+      },
+    ]
+  },
+];
+
+// ── Languages data ──
+const STUDY_RESOURCES = [
+  {
+    youtube:[
+      {name:'Curso em V&iacute;deo - Curso de Algoritmo', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dmSj0MHol_aoNYCSGFqvfXV', desc:'Playlist em portugu&ecirc;s, bem did&aacute;tica, para aprender vari&aacute;veis, condi&ccedil;&otilde;es, la&ccedil;os, vetores e racioc&iacute;nio algor&iacute;tmico.'},
+      {name:'Curso em V&iacute;deo - Python 3 Mundo 1', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dlKP6QQCekuIPky1CiwmdI6', desc:'Boa sequ&ecirc;ncia para transformar l&oacute;gica em c&oacute;digo real com uma linguagem amig&aacute;vel para iniciantes.'}
+    ],
+    sites:[
+      {name:'freeCodeCamp em portugu&ecirc;s', url:'https://www.freecodecamp.org/portuguese/', desc:'Cursos e artigos gratuitos para fundamentos.'},
+      {name:'beecrowd - problemas iniciante', url:'https://judge.beecrowd.com/pt/problems/index/1', desc:'Lista de desafios graduais para treinar algoritmo.'},
+      {name:'Exercism - trilha Python', url:'https://exercism.org/tracks/python', desc:'Exerc&iacute;cios com feedback e progress&atilde;o.'}
+    ],
+    exercises:[
+      {level:'easy', label:'F&aacute;cil', text:'Leia duas notas, calcule a m&eacute;dia e mostre aprovado, recupera&ccedil;&atilde;o ou reprovado.'},
+      {level:'medium', label:'M&eacute;dio', text:'Crie uma calculadora de IMC com fun&ccedil;&otilde;es para calcular e classificar o resultado.'},
+      {level:'hard', label:'Dif&iacute;cil', text:'Monte um sistema de caixa eletr&ocirc;nico que valide senha, saldo, saque, dep&oacute;sito e extrato.'}
+    ],
+    project:'Crie uma lista de tarefas no console com menu, adicionar, listar, concluir e remover tarefas.'
+  },
+  {
+    youtube:[
+      {name:'Curso em V&iacute;deo - Java B&aacute;sico', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dkI2ZdjTwZA4mPMxWTfNSpR', desc:'Comece aqui se ainda estiver inseguro com sintaxe, classes, m&eacute;todos e estrutura de programas em Java.'},
+      {name:'Curso em V&iacute;deo - POO', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dmGuLII3tsvryMMD7VgcT7x', desc:'Playlist focada em objetos, encapsulamento, heran&ccedil;a, polimorfismo e abstra&ccedil;&atilde;o, com explica&ccedil;&otilde;es bem comentadas.'}
+    ],
+    sites:[
+      {name:'Oracle Java Tutorials', url:'https://docs.oracle.com/javase/tutorial/java/concepts/', desc:'Material oficial sobre conceitos de Java e POO.'},
+      {name:'Dev.java - Learn Java', url:'https://dev.java/learn/', desc:'Guia moderno mantido pelo ecossistema Java.'},
+      {name:'Exercism - trilha Java', url:'https://exercism.org/tracks/java', desc:'Pr&aacute;tica incremental com classes e m&eacute;todos.'}
+    ],
+    exercises:[
+      {level:'easy', label:'F&aacute;cil', text:'Modele uma classe Aluno com nome, notas e m&eacute;todo para calcular m&eacute;dia.'},
+      {level:'medium', label:'M&eacute;dio', text:'Crie ContaCorrente e ContaPoupanca herdando de Conta, com saque e dep&oacute;sito.'},
+      {level:'hard', label:'Dif&iacute;cil', text:'Implemente um carrinho de compras com Produto, Item, Pedido, descontos e interface Pagavel.'}
+    ],
+    project:'Construa um pequeno sistema de biblioteca com Livro, Usuario, Emprestimo e regras de devolu&ccedil;&atilde;o.'
+  },
+  {
+    youtube:[
+      {name:'Curso em V&iacute;deo - MySQL', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dkBs-795Dsgvau_ekxg8g1r', desc:'Sequ&ecirc;ncia completa para criar banco, tabelas, comandos SQL e consultas com exemplos pr&aacute;ticos.'},
+      {name:'freeCodeCamp - SQL Full Database Course', url:'https://www.youtube.com/watch?v=HXV3zeQKqGY', desc:'Curso longo e direto ao ponto para refor&ccedil;ar SELECT, JOIN, modelagem b&aacute;sica e pr&aacute;tica de consultas.'}
+    ],
+    sites:[
+      {name:'SQLBolt', url:'https://sqlbolt.com/', desc:'Aulas curtas com exerc&iacute;cios interativos de SQL.'},
+      {name:'PostgreSQL Documentation', url:'https://www.postgresql.org/docs/current/tutorial.html', desc:'Tutorial oficial de um banco muito usado no mercado.'},
+      {name:'W3Schools SQL', url:'https://www.w3schools.com/sql/', desc:'Refer&ecirc;ncia r&aacute;pida para comandos e exemplos.'}
+    ],
+    exercises:[
+      {level:'easy', label:'F&aacute;cil', text:'Crie tabelas alunos e cursos, insira registros e liste todos os alunos.'},
+      {level:'medium', label:'M&eacute;dio', text:'Use JOIN para listar alunos com seus cursos e filtre por curso ativo.'},
+      {level:'hard', label:'Dif&iacute;cil', text:'Modele um e-commerce simples com clientes, produtos, pedidos e itens, incluindo totais por cliente.'}
+    ],
+    project:'Desenhe um DER e implemente um banco para controle de biblioteca com consultas de empr&eacute;stimos em atraso.'
+  },
+  {
+    youtube:[
+      {name:'CS50 - Introduction to Computer Science', url:'https://www.youtube.com/playlist?list=PLhQjrBD2T383q7Vn8QnTsVgSvyLpsqL_R', desc:'Curso excelente para entender C, mem&oacute;ria, arrays, ponteiros e o pensamento de baixo n&iacute;vel por tr&aacute;s dos programas.'}
+    ],
+    sites:[
+      {name:'Learn-C.org', url:'https://www.learn-c.org/', desc:'Exerc&iacute;cios interativos de C direto no navegador.'},
+      {name:'Beej Guide to C Programming', url:'https://beej.us/guide/bgc/', desc:'Guia gratuito e did&aacute;tico para fundamentos de C.'},
+      {name:'cppreference - C', url:'https://en.cppreference.com/w/c', desc:'Refer&ecirc;ncia precisa para biblioteca padr&atilde;o e sintaxe.'}
+    ],
+    exercises:[
+      {level:'easy', label:'F&aacute;cil', text:'Mostre o valor e o endere&ccedil;o de uma vari&aacute;vel usando ponteiro.'},
+      {level:'medium', label:'M&eacute;dio', text:'Crie uma fun&ccedil;&atilde;o trocar(a, b) que altere duas vari&aacute;veis por refer&ecirc;ncia.'},
+      {level:'hard', label:'Dif&iacute;cil', text:'Implemente um vetor din&acirc;mico com malloc, realloc, inserir, remover e liberar mem&oacute;ria.'}
+    ],
+    project:'Crie um cadastro de alunos em C com aloca&ccedil;&atilde;o din&acirc;mica e relat&oacute;rio de m&eacute;dias.'
+  },
+  {
+    youtube:[
+      {name:'Curso em V&iacute;deo - HTML5 e CSS3 M&oacute;dulo 1', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dkZ9-atkcmcBaMZdmLHft8n', desc:'Playlist muito boa para come&ccedil;ar com HTML sem&acirc;ntico, CSS, estrutura de p&aacute;ginas e publica&ccedil;&atilde;o.'},
+      {name:'Curso em V&iacute;deo - JavaScript', url:'https://www.youtube.com/playlist?list=PLHz_AreHm4dlsK3Nr9GVvXCbpQyHQl1o1', desc:'Excelente para DOM, eventos, condi&ccedil;&otilde;es, repeti&ccedil;&otilde;es e interatividade no navegador.'}
+    ],
+    sites:[
+      {name:'MDN Learn Web Development', url:'https://developer.mozilla.org/en-US/docs/Learn_web_development', desc:'Material completo e confi&aacute;vel de HTML, CSS e JS.'},
+      {name:'web.dev', url:'https://web.dev/learn', desc:'Boas pr&aacute;ticas modernas de web, performance e acessibilidade.'},
+      {name:'Frontend Mentor', url:'https://www.frontendmentor.io/challenges', desc:'Desafios visuais para praticar layout responsivo.'}
+    ],
+    exercises:[
+      {level:'easy', label:'F&aacute;cil', text:'Crie uma p&aacute;gina pessoal responsiva com HTML sem&acirc;ntico e CSS.'},
+      {level:'medium', label:'M&eacute;dio', text:'Monte uma lista de tarefas com DOM, eventos e localStorage.'},
+      {level:'hard', label:'Dif&iacute;cil', text:'Construa um dashboard que consome uma API, exibe cards, filtros e estado de carregamento.'}
+    ],
+    project:'Crie um portf&oacute;lio de estudante com projetos, habilidades, contato e modo claro/escuro.'
+  }
+];
+
+const PROJECT_AREAS = ['Todas', 'Logica', 'POO', 'Banco de Dados', 'Web', 'Mobile', 'Seguranca e QA'];
+const PROJECT_LEVELS = [
+  {key:'all', label:'Todos'},
+  {key:'easy', label:'Facil'},
+  {key:'medium', label:'Medio'},
+  {key:'hard', label:'Dificil'}
+];
+const PROJECTS = [
+  {
+    area:'Logica', level:'easy', icon:'LG', title:'Calculadora de notas e situacao',
+    summary:'Um programa de console que recebe dados de alunos, calcula media e informa a situacao final com regras claras.',
+    how:['O usuario informa nome do aluno e tres notas.', 'O sistema calcula a media automaticamente.', 'A situacao deve ser Aprovado, Recuperacao ou Reprovado conforme faixas definidas.', 'No final, mostra um resumo com nome, media formatada e situacao.'],
+    requirements:['Validar notas entre 0 e 10.', 'Usar condicionais para classificar a media.', 'Organizar o calculo em pelo menos uma funcao.'],
+    deliverables:['Arquivo do codigo-fonte.', 'Print ou texto com tres testes: aprovado, recuperacao e reprovado.', 'Pequeno README explicando as regras de media.']
+  },
+  {
+    area:'Logica', level:'medium', icon:'LG', title:'Sistema de caixa eletronico',
+    summary:'Simula um caixa eletronico simples com saldo, saque, deposito, extrato e validacao de senha.',
+    how:['Ao iniciar, pede senha numerica.', 'Depois do login, exibe menu com saldo, deposito, saque, extrato e sair.', 'Cada operacao volta para o menu ate o usuario escolher sair.', 'O extrato guarda as operacoes feitas durante a sessao.'],
+    requirements:['Usar laco de repeticao para manter o menu ativo.', 'Bloquear saque maior que o saldo.', 'Separar as operacoes em funcoes pequenas.', 'Tratar entrada invalida sem encerrar o programa.'],
+    deliverables:['Codigo organizado em funcoes.', 'Lista de cenarios testados.', 'README com fluxo do menu e regras de validacao.']
+  },
+  {
+    area:'Logica', level:'hard', icon:'LG', title:'Jogo de batalha por turnos',
+    summary:'Um jogo de console em que jogador e inimigo se enfrentam com ataque, defesa, cura e regras de vitoria.',
+    how:['O jogador escolhe uma acao a cada turno.', 'O inimigo tambem age a cada turno, com uma estrategia simples.', 'Vida, dano, defesa e cura devem alterar o estado da batalha.', 'A partida termina quando a vida de um personagem chega a zero.'],
+    requirements:['Modelar estados do jogador e do inimigo.', 'Criar regras para dano, defesa e cura.', 'Usar aleatoriedade controlada para dano ou acao inimiga.', 'Evitar valores impossiveis, como vida negativa exibida na tela.'],
+    deliverables:['Codigo com funcoes para turno, ataque, defesa e cura.', 'Descricao das regras do jogo.', 'Tres melhorias futuras listadas no README.']
+  },
+  {
+    area:'POO', level:'easy', icon:'OO', title:'Cadastro de alunos com classes',
+    summary:'Projeto para praticar classe, objeto, atributos e metodos usando uma turma de alunos.',
+    how:['Cada aluno tem nome, matricula e notas.', 'A classe calcula media e situacao.', 'O programa cria alguns alunos e lista o boletim da turma.', 'A saida deve ser legivel e organizada.'],
+    requirements:['Criar classe Aluno.', 'Usar construtor para iniciar os dados.', 'Criar metodos para media, situacao e exibicao.', 'Evitar repetir calculos em varios lugares.'],
+    deliverables:['Codigo com a classe Aluno.', 'Exemplo de pelo menos cinco alunos.', 'README explicando quais atributos e metodos existem.']
+  },
+  {
+    area:'POO', level:'medium', icon:'OO', title:'Biblioteca com emprestimos',
+    summary:'Sistema de biblioteca com livros, usuarios e emprestimos, ideal para praticar relacionamento entre classes.',
+    how:['Usuarios podem pegar livros emprestados.', 'Um livro emprestado fica indisponivel ate ser devolvido.', 'O sistema deve listar livros disponiveis e historico de emprestimos.', 'A devolucao libera o livro novamente.'],
+    requirements:['Criar classes Livro, Usuario e Emprestimo.', 'Controlar disponibilidade do livro.', 'Impedir emprestimo duplicado de livro indisponivel.', 'Separar regra de negocio da exibicao no console.'],
+    deliverables:['Diagrama simples das classes.', 'Codigo funcionando com menu.', 'README com exemplos de uso.']
+  },
+  {
+    area:'POO', level:'hard', icon:'OO', title:'Mini e-commerce orientado a objetos',
+    summary:'Carrinho de compras com produtos, itens, descontos, pedido e formas de pagamento.',
+    how:['O usuario adiciona produtos ao carrinho.', 'Cada item tem produto, quantidade e subtotal.', 'O pedido calcula total, aplica desconto e escolhe uma forma de pagamento.', 'Ao finalizar, mostra recibo detalhado.'],
+    requirements:['Usar composicao entre Pedido, Carrinho e ItemCarrinho.', 'Criar interface ou classe abstrata para pagamento.', 'Validar estoque e quantidade.', 'Aplicar ao menos um principio SOLID de forma simples.'],
+    deliverables:['Codigo dividido por classes.', 'README com regras de desconto e pagamento.', 'Lista de testes manuais para estoque, total e finalizacao.']
+  },
+  {
+    area:'Banco de Dados', level:'easy', icon:'BD', title:'Agenda de contatos',
+    summary:'Banco simples para cadastrar contatos e consultar por nome, telefone ou cidade.',
+    how:['Criar tabela de contatos.', 'Inserir contatos de exemplo.', 'Consultar todos os contatos e filtrar por cidade ou parte do nome.', 'Atualizar telefone e remover contato quando necessario.'],
+    requirements:['Usar CREATE TABLE, INSERT, SELECT, UPDATE e DELETE.', 'Definir chave primaria.', 'Criar consultas com WHERE e ORDER BY.'],
+    deliverables:['Script SQL completo.', 'Print ou resultado das consultas.', 'Breve explicacao da estrutura da tabela.']
+  },
+  {
+    area:'Banco de Dados', level:'medium', icon:'BD', title:'Controle de biblioteca em SQL',
+    summary:'Modelo relacional com livros, autores, usuarios e emprestimos usando chaves estrangeiras.',
+    how:['Cadastrar autores e livros.', 'Cadastrar usuarios.', 'Registrar emprestimos e devolucoes.', 'Consultar livros atrasados, disponiveis e historico por usuario.'],
+    requirements:['Usar pelo menos quatro tabelas relacionadas.', 'Criar PK e FK corretamente.', 'Usar INNER JOIN e LEFT JOIN.', 'Criar consultas com GROUP BY para relatorios.'],
+    deliverables:['DER simples em imagem ou texto.', 'Script de criacao e inserts.', 'Arquivo com consultas principais comentadas.']
+  },
+  {
+    area:'Banco de Dados', level:'hard', icon:'BD', title:'Banco de e-commerce com relatorios',
+    summary:'Modelo completo para pedidos, clientes, produtos, estoque, itens e relatorios gerenciais.',
+    how:['Clientes fazem pedidos com varios produtos.', 'Cada pedido guarda itens, quantidade e preco praticado.', 'O estoque diminui quando o pedido e confirmado.', 'Relatorios mostram faturamento, produtos mais vendidos e clientes recorrentes.'],
+    requirements:['Normalizar o modelo ate pelo menos 3FN.', 'Usar transacao para confirmar pedido.', 'Criar indices para campos de busca frequente.', 'Criar consultas agregadas com SUM, COUNT e HAVING.'],
+    deliverables:['DER completo.', 'Script SQL com tabelas, dados e consultas.', 'README com decisoes de modelagem.']
+  },
+  {
+    area:'Web', level:'easy', icon:'WB', title:'Pagina pessoal responsiva',
+    summary:'Uma pagina de apresentacao com sobre, habilidades, projetos e contato.',
+    how:['A primeira tela apresenta nome, objetivo e chamada para contato.', 'A pagina tem secoes de habilidades, projetos e links.', 'O layout deve funcionar bem em celular e desktop.', 'Os links externos abrem em nova aba.'],
+    requirements:['Usar HTML semantico.', 'Usar Flexbox ou Grid.', 'Criar responsividade com media queries.', 'Garantir contraste e textos legiveis.'],
+    deliverables:['Arquivo HTML e CSS.', 'Print mobile e desktop.', 'README com descricao do layout.']
+  },
+  {
+    area:'Web', level:'medium', icon:'WB', title:'Lista de tarefas com localStorage',
+    summary:'Aplicacao web interativa para criar, concluir, filtrar e remover tarefas persistindo dados no navegador.',
+    how:['O usuario cadastra tarefas por um formulario.', 'Cada tarefa pode ser marcada como concluida.', 'Filtros mostram todas, pendentes ou concluidas.', 'Ao recarregar a pagina, as tarefas continuam salvas.'],
+    requirements:['Manipular DOM com JavaScript.', 'Usar localStorage para persistencia.', 'Validar campo vazio.', 'Criar estados visuais para tarefa concluida.'],
+    deliverables:['HTML, CSS e JS separados ou organizados.', 'README com funcionalidades.', 'Lista de melhorias futuras.']
+  },
+  {
+    area:'Web', level:'hard', icon:'WB', title:'Dashboard com API e filtros',
+    summary:'Painel que consome dados de uma API, mostra cards, filtros, busca e estados de carregamento.',
+    how:['Ao abrir, a pagina busca dados externos.', 'Enquanto carrega, mostra estado de loading.', 'Se falhar, mostra mensagem de erro amigavel.', 'O usuario filtra, busca e ordena os dados exibidos.'],
+    requirements:['Usar fetch com async/await.', 'Separar funcoes de busca, renderizacao e filtros.', 'Criar estado vazio para nenhum resultado.', 'Manter layout responsivo.'],
+    deliverables:['Codigo completo.', 'README com API usada e fluxo de dados.', 'Prints dos estados: loading, sucesso, erro e vazio.']
+  },
+  {
+    area:'Mobile', level:'easy', icon:'MB', title:'App de habitos simples',
+    summary:'Aplicativo para registrar habitos diarios e marcar se foram cumpridos no dia.',
+    how:['Tela inicial lista os habitos.', 'O usuario adiciona um novo habito com nome.', 'Cada habito pode ser marcado como feito hoje.', 'A tela mostra quantos habitos foram concluidos.'],
+    requirements:['Criar componentes de lista e formulario.', 'Usar estado local.', 'Validar nome vazio.', 'Pensar em interface touch simples.'],
+    deliverables:['Protótipo ou app funcional.', 'Print das telas principais.', 'README com fluxo de uso.']
+  },
+  {
+    area:'Mobile', level:'medium', icon:'MB', title:'App de despesas pessoais',
+    summary:'Aplicativo para registrar entradas e saidas, visualizar saldo e filtrar lancamentos.',
+    how:['Usuario cadastra receita ou despesa com valor, categoria e data.', 'A tela mostra saldo atual.', 'Lista de lancamentos pode ser filtrada por tipo ou categoria.', 'Valores devem aparecer formatados em reais.'],
+    requirements:['Criar formulario com validacao.', 'Persistir dados localmente.', 'Separar componentes de resumo, formulario e lista.', 'Tratar edicao ou exclusao de lancamentos.'],
+    deliverables:['App ou prototipo navegavel.', 'README com regras de calculo.', 'Prints das telas de cadastro e listagem.']
+  },
+  {
+    area:'Mobile', level:'hard', icon:'MB', title:'App de estudos com revisao espacada',
+    summary:'Aplicativo que agenda revisoes de conteudos usando niveis de dominio e datas futuras.',
+    how:['Usuario cadastra assunto estudado.', 'Ao revisar, informa se lembrou facil, medio ou dificil.', 'O app calcula a proxima revisao.', 'Uma tela mostra revisoes de hoje e atrasadas.'],
+    requirements:['Modelar regra de repeticao espacada.', 'Persistir historico de revisoes.', 'Criar filtros por status.', 'Projetar notificacoes ou lembretes como melhoria planejada.'],
+    deliverables:['App funcional ou prototipo detalhado.', 'Documento explicando algoritmo de revisao.', 'Casos de teste para calculo de proxima data.']
+  },
+  {
+    area:'Seguranca e QA', level:'easy', icon:'QA', title:'Checklist de qualidade de uma pagina',
+    summary:'Auditoria simples de uma pagina web verificando acessibilidade, responsividade e erros comuns.',
+    how:['Escolha uma pagina existente.', 'Verifique textos, contraste, links, responsividade e formularios.', 'Registre problemas encontrados.', 'Proponha correcoes objetivas.'],
+    requirements:['Criar checklist com criterios claros.', 'Testar em pelo menos dois tamanhos de tela.', 'Registrar evidencias dos problemas.', 'Classificar prioridade: baixa, media ou alta.'],
+    deliverables:['Relatorio em Markdown.', 'Tabela de problemas e solucoes.', 'Prints antes/depois quando houver correcao.']
+  },
+  {
+    area:'Seguranca e QA', level:'medium', icon:'QA', title:'API com testes automatizados',
+    summary:'Criar ou testar uma API simples com testes para rotas principais e cenarios de erro.',
+    how:['A API deve ter rotas de cadastro, listagem, edicao e exclusao.', 'Os testes verificam sucesso e erro.', 'Cada teste deve preparar dados e validar resposta.', 'Um comando deve rodar todos os testes.'],
+    requirements:['Testar status code e corpo da resposta.', 'Criar testes para entrada invalida.', 'Organizar testes por recurso.', 'Documentar como executar a suite.'],
+    deliverables:['Codigo da API ou colecao de testes.', 'Arquivo de testes automatizados.', 'README com comando de execucao e cobertura manual.']
+  },
+  {
+    area:'Seguranca e QA', level:'hard', icon:'QA', title:'Login seguro com testes e ameacas',
+    summary:'Fluxo de autenticacao com senha protegida, validacao, testes e analise de riscos.',
+    how:['Usuario cria conta com email e senha.', 'Senha nunca deve ser salva em texto puro.', 'Login retorna sessao ou token.', 'O sistema bloqueia entradas invalidas e responde erros sem vazar detalhes sensiveis.'],
+    requirements:['Usar hash de senha.', 'Validar email e senha forte.', 'Criar testes para cadastro, login, senha errada e usuario inexistente.', 'Mapear riscos como brute force, SQL injection e XSS.'],
+    deliverables:['Codigo ou prototipo tecnico.', 'Testes automatizados.', 'Mini threat model com riscos e mitigacoes.']
+  }
+];
+
+const LANGS = [
+  {
+    emoji:'🐍', name:'Python', tag:'Lógica • dados • IA',
+    why:'Sintaxe limpa, ideal para quem está aprendendo. Muito usada em análise de dados, automação e inteligência artificial — áreas em alta no Brasil.',
+    basics:['Indentação obrigatória — sem chaves, o espaço define o bloco','def para funções, class para classes com POO','Tipagem dinâmica: não precisa declarar o tipo (mas é boa prática usar type hints)','list, dict, tuple, set — coleções nativas poderosas','List comprehensions: [x*2 for x in lista if x > 0]','Módulos: import math, from datetime import date'],
+    code:`<span class="cm"># Programa: lista de tarefas simples</span>
+
+<span class="kw">class</span> <span class="fn">Tarefa</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, titulo: str):
+        <span class="kw">self</span>.titulo  = titulo
+        <span class="kw">self</span>.feita   = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">concluir</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.feita = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(<span class="kw">self</span>):
+        status = <span class="str">"✓"</span> <span class="kw">if</span> <span class="kw">self</span>.feita <span class="kw">else</span> <span class="str">"○"</span>
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"{status} {self.titulo}"</span>
+
+tarefas = [<span class="fn">Tarefa</span>(<span class="str">"Estudar Python"</span>), <span class="fn">Tarefa</span>(<span class="str">"Fazer exercícios"</span>)]
+tarefas[<span class="num">0</span>].<span class="fn">concluir</span>()
+<span class="kw">for</span> t <span class="kw">in</span> tarefas:
+    <span class="fn">print</span>(t)`
+  },
+  {
+    emoji:'☕', name:'Java', tag:'POO • back-end • corporativo',
+    why:'Fortemente tipada e 100% orientada a objetos. Padrão nos cursos de ADS e amplamente usada em sistemas corporativos, fintech e Android nativo.',
+    basics:['Tudo dentro de classes — não existem funções soltas','Tipagem estática: int, double, String, boolean (declare sempre o tipo)','public static void main(String[] args) é o ponto de entrada','JVM: compile (.java → .class) e execute em qualquer SO','Coleções: ArrayList<>, HashMap<>, LinkedList<>','Exceções: try / catch / finally para tratar erros'],
+    code:`<span class="kw">import</span> java.util.ArrayList;
+
+<span class="kw">public class</span> <span class="fn">ListaTarefas</span> {
+  <span class="kw">private</span> ArrayList<span class="kw">&lt;</span><span class="fn">String</span><span class="kw">&gt;</span> tarefas = <span class="kw">new</span> ArrayList<>();
+
+  <span class="kw">public void</span> <span class="fn">adicionar</span>(<span class="fn">String</span> t) { tarefas.<span class="fn">add</span>(t); }
+
+  <span class="kw">public void</span> <span class="fn">listar</span>() {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < tarefas.<span class="fn">size</span>(); i++) {
+      <span class="fn">System</span>.out.<span class="fn">println</span>((i+<span class="num">1</span>) + <span class="str">". "</span> + tarefas.<span class="fn">get</span>(i));
+    }
+  }
+
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="fn">String</span>[] args) {
+    <span class="fn">ListaTarefas</span> lista = <span class="kw">new</span> <span class="fn">ListaTarefas</span>();
+    lista.<span class="fn">adicionar</span>(<span class="str">"Estudar Java"</span>);
+    lista.<span class="fn">adicionar</span>(<span class="str">"Praticar POO"</span>);
+    lista.<span class="fn">listar</span>();
+  }
+}`
+  },
+  {
+    emoji:'🌐', name:'JavaScript', tag:'Front-end • Node.js • fullstack',
+    why:'A única linguagem nativa do navegador. Com Node.js vai ao back-end também. A maior demanda do mercado web brasileiro — imprescindível para qualquer dev.',
+    basics:['let/const (prefira) e var — escopo diferente','Tipagem dinâmica e fraca — cuidado com == (use sempre ===)','Arrow functions: const soma = (a, b) => a + b','Async/await para operações assíncronas (fetch, banco, arquivos)','DOM: document.querySelector(), addEventListener()','Módulos ES6: import/export e require() no Node.js'],
+    code:`<span class="cm">// Classe com async — buscar dados de API</span>
+
+<span class="kw">class</span> <span class="fn">ViaCEP</span> {
+  <span class="kw">static async</span> <span class="fn">buscar</span>(cep) {
+    <span class="kw">const</span> url = <span class="str">\`https://viacep.com.br/ws/\${cep}/json/\`</span>;
+    <span class="kw">const</span> res  = <span class="kw">await</span> <span class="fn">fetch</span>(url);
+    <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'CEP inválido'</span>);
+    <span class="kw">return</span> res.<span class="fn">json</span>();
+  }
+}
+
+<span class="cm">// Usar com async/await</span>
+(<span class="kw">async</span> () => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> end = <span class="kw">await</span> <span class="fn">ViaCEP</span>.<span class="fn">buscar</span>(<span class="str">'01001000'</span>);
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">\`\${end.logradouro}, \${end.bairro}\`</span>);
+  } <span class="kw">catch</span> (e) { <span class="fn">console</span>.<span class="fn">error</span>(e.message); }
+})();`
+  },
+  {
+    emoji:'🐘', name:'PHP', tag:'Web back-end • WordPress',
+    why:'Ainda amplamente usado no mercado web (WordPress, Magento, sistemas legados). Muito fácil de hospedar e tem frameworks modernos como Laravel.',
+    basics:['Todo arquivo começa com <?php','Variáveis com $: $nome = "Ana"','Arrays associativos como dicionários: $aluno = ["nome" => "Ana", "nota" => 8]','Funções built-in ricas para strings, arrays e datas','Conexão com MySQL via PDO (prepare + execute para evitar SQL Injection)','Framework Laravel para projetos profissionais'],
+    code:`<span class="kw">&lt;?php</span>
+
+<span class="kw">class</span> <span class="fn">Produto</span> {
+  <span class="kw">private</span> <span class="kw">string</span> $nome;
+  <span class="kw">private</span> <span class="kw">float</span>  $preco;
+
+  <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">string</span> $nome, <span class="kw">float</span> $preco) {
+    $<span class="kw">this</span>->nome  = $nome;
+    $<span class="kw">this</span>->preco = $preco;
+  }
+
+  <span class="kw">public function</span> <span class="fn">comDesconto</span>(<span class="kw">float</span> $pct): <span class="kw">float</span> {
+    <span class="kw">return</span> $<span class="kw">this</span>->preco * (<span class="num">1</span> - $pct / <span class="num">100</span>);
+  }
+
+  <span class="kw">public function</span> <span class="fn">__toString</span>(): <span class="kw">string</span> {
+    <span class="kw">return</span> <span class="str">"{$this->nome}: R$ {$this->preco}"</span>;
+  }
+}
+
+$p = <span class="kw">new</span> <span class="fn">Produto</span>(<span class="str">"Notebook"</span>, <span class="num">3500.00</span>);
+<span class="fn">echo</span> $p . <span class="str">"\n"</span>;
+<span class="fn">echo</span> <span class="str">"Com 10% off: R$ "</span> . $p-><span class="fn">comDesconto</span>(<span class="num">10</span>);
+<span class="kw">?&gt;</span>`
+  },
+  {
+    emoji:'🔵', name:'C', tag:'Sistemas • ponteiros • fundamentos',
+    why:'Ensina como o computador funciona de verdade: ponteiros, memória, bits. Base de sistemas operacionais, drivers e jogos. Muitos cursos de ADS ensinam lógica em C.',
+    basics:['#include para importar bibliotecas de sistema','Tipagem forte e estática — declare sempre antes de usar','Ponteiros (*) e endereços (&) — controle manual de memória','Compile com gcc -o programa programa.c antes de executar','Strings são arrays de char terminados com \\0','Sem coleta de lixo — memória manual com malloc/free'],
+    code:`<span class="kw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;stdlib.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;string.h&gt;</span>
+
+<span class="cm">// Struct — agrupa dados (como uma classe simples)</span>
+<span class="kw">typedef struct</span> {
+  <span class="kw">char</span>   nome[<span class="num">50</span>];
+  <span class="kw">float</span>  nota;
+} Aluno;
+
+<span class="kw">float</span> <span class="fn">media</span>(Aluno *alunos, <span class="kw">int</span> n) {
+  <span class="kw">float</span> soma = <span class="num">0</span>;
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i < n; i++) soma += alunos[i].nota;
+  <span class="kw">return</span> soma / n;
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  Aluno turma[] = {
+    {<span class="str">"Ana"</span>, <span class="num">8.5</span>}, {<span class="str">"Bob"</span>, <span class="num">7.0</span>}, {<span class="str">"Carol"</span>, <span class="num">9.0</span>}
+  };
+  <span class="kw">int</span> n = <span class="kw">sizeof</span>(turma) / <span class="kw">sizeof</span>(turma[<span class="num">0</span>]);
+  <span class="fn">printf</span>(<span class="str">"Média: %.1f\n"</span>, <span class="fn">media</span>(turma, n)); <span class="cm">// 8.2</span>
+  <span class="kw">return</span> <span class="num">0</span>;
+}`
+  },
+];
+
+// ── Checklist data ──
+const CHECKS = [
+  {
+    group:'🧠 Lógica de programação (1º semestre)',
+    items:['Sei o que é variável e tipo de dado (int, float, string, bool)','Uso operadores aritméticos e relacionais corretamente','Escrevo condicionais com if / else if / else','Consigo criar laços for e while sem travar em loop infinito','Crio funções com parâmetros e valor de retorno','Trabalho com arrays e percorro com laço','Consigo desenhar um fluxograma de um algoritmo simples']
+  },
+  {
+    group:'🔷 POO — Programação Orientada a Objetos (2º semestre)',
+    items:['Crio classes com atributos e métodos','Aplico encapsulamento (private/public/protected)','Implemento herança entre classes (extends / super)','Entendo polimorfismo na prática (override de métodos)','Sei usar interfaces ou classes abstratas','Conheço ao menos 2 dos 5 princípios SOLID']
+  },
+  {
+    group:'📊 Algoritmos e Estruturas de Dados (2º semestre)',
+    items:['Entendo a diferença entre O(1), O(n) e O(n²)','Sei implementar e usar pilha (Stack)','Sei implementar e usar fila (Queue)','Conheço árvore binária e suas travessias','Uso HashMap / dicionário para busca eficiente','Implemento Bubble Sort e Merge Sort']
+  },
+  {
+    group:'🗃️ Banco de Dados (2º e 3º semestre)',
+    items:['Crio tabelas com CREATE TABLE, PK e FK','Uso SELECT com WHERE, ORDER BY e GROUP BY','Faço INNER JOIN e LEFT JOIN entre tabelas','Escrevo INSERT, UPDATE e DELETE com WHERE correto','Entendo 1FN, 2FN e 3FN (normalização)','Sei fazer um Diagrama Entidade-Relacionamento (DER)']
+  },
+  {
+    group:'🌐 Desenvolvimento Web (3º semestre)',
+    items:['Estruturo páginas com HTML semântico','Aplico CSS: box model, Flexbox e Grid','Manipulo o DOM com JavaScript (querySelector, eventos)','Faço requisições com fetch / async-await','Entendo o modelo HTTP: verbos, status codes e REST','Criei pelo menos um projeto web com front + back + banco']
+  },
+  {
+    group:'⚙️ Avançado — 4º e 5º semestre',
+    items:['Conheço os padrões de arquitetura MVC e Clean Architecture','Sei escrever testes unitários (JUnit, pytest ou similar)','Tenho noção de segurança: SQL Injection, XSS, HTTPS','Criei pelo menos um app mobile simples','Conheço o básico de Docker e containers','Entendo o que é cloud e implantei algo na AWS, Azure ou GCP']
+  },
+];
+
+let checked = new Set();
+
+// ── Render functions ──
+
+// Topics
+let activeTopic = null;
+function renderTopics() {
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML = '';
+  TOPICS.forEach((t, i) => {
+    const c = document.createElement('div');
+    c.className = 'topic-card' + (activeTopic === i ? ' active' : '');
+    c.innerHTML = `<div class="topic-emoji">${t.emoji}</div><div class="topic-name">${t.name}</div><div class="topic-desc">${t.desc}</div>`;
+    c.onclick = () => { activeTopic = activeTopic === i ? null : i; renderTopics(); };
+    grid.appendChild(c);
+  });
+  const det = document.getElementById('topicDetail');
+  if (activeTopic !== null) {
+    const t = TOPICS[activeTopic];
+    det.innerHTML = `<div class="topic-detail active">
+      <h3>${t.emoji} ${t.name}</h3>
+      <div style="font-size:12px;color:var(--accent);margin-bottom:1rem;font-weight:600;">${t.disciplina}</div>
+      <ul class="sub-list">${t.subs.map((s,j)=>`<li class="sub-item"><span class="sub-num">${String(j+1).padStart(2,'0')}</span><div class="sub-text"><strong>${s.t}</strong><span>${s.d}</span></div></li>`).join('')}</ul>
+    </div>`;
+  } else { det.innerHTML = ''; }
+}
+
+// Apostilas
+function renderResourceList(items) {
+  return `<ul class="resource-list">${items.map(item=>`
+    <li>
+      <a class="resource-link" href="${item.url}" target="_blank" rel="noopener noreferrer">${item.name}</a>
+      <span class="resource-desc">${item.desc}</span>
+    </li>`).join('')}</ul>`;
+}
+
+function renderStudyKit(resource) {
+  if (!resource) return '';
+  return `
+    <div class="study-kit">
+      <div class="resource-panel">
+        <div class="resource-title">Aulas no YouTube</div>
+        ${renderResourceList(resource.youtube)}
+      </div>
+      <div class="resource-panel">
+        <div class="resource-title">Sites e material did&aacute;tico</div>
+        ${renderResourceList(resource.sites)}
+      </div>
+      <div class="resource-panel wide">
+        <div class="resource-title">Exerc&iacute;cios para praticar</div>
+        <ul class="exercise-list">${resource.exercises.map(ex=>`
+          <li class="exercise-item">
+            <span class="exercise-level ${ex.level}">${ex.label}</span>
+            <span class="exercise-text">${ex.text}</span>
+          </li>`).join('')}</ul>
+      </div>
+      <div class="resource-panel wide">
+        <div class="resource-title">Projeto recomendado</div>
+        <div class="project-callout"><strong>Para fixar de verdade</strong>${resource.project}</div>
+      </div>
+    </div>`;
+}
+
+function renderApostilas() {
+  const list = document.getElementById('apostilaList');
+  list.innerHTML = '';
+  APOSTILAS.forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'apos-card';
+    card.innerHTML = `
+      <div class="apos-header" onclick="toggleApos(${i})">
+        <div class="apos-icon" style="background:${a.bg}">${a.icon}</div>
+        <div class="apos-meta">
+          <div class="apos-title">${a.title}</div>
+          <div class="apos-sub">${a.sub}</div>
+        </div>
+        <span class="apos-arrow" id="arr${i}">▾</span>
+      </div>
+      <div class="apos-body" id="abody${i}">
+        ${a.concepts.map(c=>`
+          <div class="concept">
+            <div class="concept-label">${c.label}</div>
+            <div class="concept-title">${c.t}</div>
+            <div class="concept-text">${c.text}</div>
+            <pre class="code">${c.code}</pre>
+          </div>`).join('')}
+        ${renderStudyKit(STUDY_RESOURCES[i])}
+      </div>`;
+    list.appendChild(card);
+  });
+}
+function toggleApos(i) {
+  const b = document.getElementById('abody'+i), a = document.getElementById('arr'+i);
+  const open = b.classList.toggle('open');
+  a.classList.toggle('open', open);
+}
+
+// Languages
+let activeLang = null;
+function renderLangs() {
+  const sel = document.getElementById('langSelector');
+  sel.innerHTML = '';
+  const panels = document.getElementById('langPanels');
+  panels.innerHTML = '';
+  LANGS.forEach((l, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'lang-btn' + (activeLang === i ? ' active' : '');
+    btn.innerHTML = `<div class="lang-emoji">${l.emoji}</div><div class="lang-name">${l.name}</div><div class="lang-when">${l.tag}</div>`;
+    btn.onclick = () => { activeLang = activeLang === i ? null : i; renderLangs(); };
+    sel.appendChild(btn);
+
+    if (activeLang === i) {
+      const panel = document.createElement('div');
+      panel.className = 'lang-panel active';
+      panel.innerHTML = `
+        <div class="lang-panel-header">
+          <div class="lang-panel-emoji">${l.emoji}</div>
+          <div><div class="lang-panel-name">${l.name}</div><div class="lang-panel-tag">${l.tag}</div></div>
+        </div>
+        <div class="lang-section">
+          <div class="lang-section-label">Por que aprender</div>
+          <div class="lang-why">${l.why}</div>
+        </div>
+        <div class="lang-section">
+          <div class="lang-section-label">O que entender primeiro</div>
+          <ul class="pillar-list">${l.basics.map(b=>`<li class="pillar-item">${b}</li>`).join('')}</ul>
+        </div>
+        <div class="lang-section">
+          <div class="lang-section-label">Exemplo real</div>
+          <pre class="code">${l.code}</pre>
+        </div>`;
+      panels.appendChild(panel);
+    }
+  });
+}
+
+// Projects
+let activeProjectArea = 'Todas';
+let activeProjectLevel = 'all';
+
+function renderProjectFilters() {
+  const areaBox = document.getElementById('projectAreaFilters');
+  const levelBox = document.getElementById('projectLevelFilters');
+  areaBox.innerHTML = PROJECT_AREAS.map(area => `
+    <button class="project-filter${activeProjectArea === area ? ' active' : ''}" onclick="setProjectArea('${area}')">${area}</button>
+  `).join('');
+  levelBox.innerHTML = PROJECT_LEVELS.map(level => `
+    <button class="project-filter${activeProjectLevel === level.key ? ' active' : ''}" onclick="setProjectLevel('${level.key}')">${level.label}</button>
+  `).join('');
+}
+
+function projectLevelLabel(level) {
+  const found = PROJECT_LEVELS.find(item => item.key === level);
+  return found ? found.label : level;
+}
+
+function renderProjects() {
+  renderProjectFilters();
+  const grid = document.getElementById('projectsGrid');
+  const filtered = PROJECTS.filter(project => {
+    const areaOk = activeProjectArea === 'Todas' || project.area === activeProjectArea;
+    const levelOk = activeProjectLevel === 'all' || project.level === activeProjectLevel;
+    return areaOk && levelOk;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="project-empty">Nenhum projeto encontrado para esse filtro.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(project => `
+    <article class="project-card">
+      <div class="project-head">
+        <div class="project-icon">${project.icon}</div>
+        <div>
+          <div class="project-title">${project.title}</div>
+          <div class="project-meta">
+            <span class="project-tag">${project.area}</span>
+            <span class="project-tag ${project.level}">${projectLevelLabel(project.level)}</span>
+          </div>
+        </div>
+      </div>
+      <p class="project-summary">${project.summary}</p>
+      <div class="project-section">
+        <div class="project-section-title">Como deve funcionar</div>
+        <ul class="project-list">${project.how.map(item=>`<li>${item}</li>`).join('')}</ul>
+      </div>
+      <div class="project-section">
+        <div class="project-section-title">Requisitos tecnicos</div>
+        <ul class="project-list">${project.requirements.map(item=>`<li>${item}</li>`).join('')}</ul>
+      </div>
+      <div class="project-section">
+        <div class="project-section-title">O que entregar</div>
+        <ul class="project-list">${project.deliverables.map(item=>`<li>${item}</li>`).join('')}</ul>
+      </div>
+    </article>
+  `).join('');
+}
+
+function setProjectArea(area) {
+  activeProjectArea = area;
+  renderProjects();
+}
+
+function setProjectLevel(level) {
+  activeProjectLevel = level;
+  renderProjects();
+}
+
+// Checklist
+function renderChecklist() {
+  const cont = document.getElementById('checklistContent');
+  cont.innerHTML = '';
+  CHECKS.forEach((g, gi) => {
+    const done = g.items.filter((_,ii)=>checked.has(`${gi}-${ii}`)).length;
+    const sec = document.createElement('div');
+    sec.className = 'checklist-group';
+    sec.innerHTML = `
+      <div class="checklist-group-title">${g.group}<span class="group-prog">${done}/${g.items.length}</span></div>
+      <div class="check-items">${g.items.map((item,ii)=>{
+        const key=`${gi}-${ii}`, done=checked.has(key);
+        return `<div class="check-item${done?' done':''}" onclick="toggleCheck('${key}')">
+          <div class="check-box">${done?'✓':''}</div>
+          <div class="check-label">${item}</div>
+        </div>`;
+      }).join('')}</div>`;
+    cont.appendChild(sec);
+  });
+  renderProgress();
+}
+function toggleCheck(key) {
+  checked.has(key) ? checked.delete(key) : checked.add(key);
+  renderChecklist();
+}
+function renderProgress() {
+  const bars = document.getElementById('progressBars');
+  bars.innerHTML = '';
+  CHECKS.forEach((g,gi)=>{
+    const total=g.items.length, done=g.items.filter((_,ii)=>checked.has(`${gi}-${ii}`)).length;
+    const pct=Math.round(done/total*100);
+    const row=document.createElement('div');
+    row.className='prog-row';
+    row.innerHTML=`<div class="prog-head"><span>${g.group.replace(/^\S+\s/,'')}</span><span>${pct}%</span></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>`;
+    bars.appendChild(row);
+  });
+}
+
+// Init
+renderTopics();
+renderApostilas();
+renderLangs();
+renderProjects();
+renderChecklist();
+</script>
+</body>
+</html>
